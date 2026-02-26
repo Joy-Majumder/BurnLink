@@ -10,6 +10,8 @@ function mapRow(row) {
     path: row.path,
     originalName: row.original_name,
     password: row.password,
+    failedAttempts: row.failed_attempts || 0,
+    lockedUntil: row.locked_until || null,
   };
 }
 
@@ -22,8 +24,10 @@ async function createFile({ path, originalName, password }) {
       path,
       original_name: originalName,
       password: hashedPassword,
+      failed_attempts: 0,
+      locked_until: null,
     })
-    .select("id, path, original_name, password")
+    .select("*")
     .single();
 
   if (error) {
@@ -36,7 +40,7 @@ async function createFile({ path, originalName, password }) {
 async function findFileById(id) {
   const { data, error } = await supabase
     .from(filesTable)
-    .select("id, path, original_name, password")
+    .select("*")
     .eq("id", id)
     .maybeSingle();
 
@@ -45,6 +49,20 @@ async function findFileById(id) {
   }
 
   return mapRow(data);
+}
+
+async function updateLockState(id, failedAttempts, lockedUntil) {
+  const { error } = await supabase
+    .from(filesTable)
+    .update({
+      failed_attempts: failedAttempts,
+      locked_until: lockedUntil,
+    })
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }
 
 async function deleteFileById(id) {
@@ -70,5 +88,6 @@ module.exports = {
   createFile,
   findById: findFileById,
   deleteById: deleteFileById,
+  updateLockState,
   comparePassword,
 };

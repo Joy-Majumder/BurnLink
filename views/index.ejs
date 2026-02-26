@@ -1,133 +1,296 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>File Sharing Server</title>
-    <style>
-      body {
-        font-family: Segoe UI, Arial, sans-serif;
-        background: #f2f4f7;
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-      }
-      .card {
-        width: min(560px, 92vw);
-        background: #fff;
-        border-radius: 10px;
-        padding: 1.25rem;
-        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
-      }
-      h1 {
-        margin-top: 0;
-      }
-      form {
-        display: grid;
-        gap: 0.75rem;
-      }
-      input,
-      button {
-        font-size: 1rem;
-        padding: 0.6rem;
-      }
-      button {
-        cursor: pointer;
-      }
-      .error {
-        color: #b42318;
-      }
-      .link-box {
-        margin-top: 1rem;
-        padding: 0.75rem;
-        border: 1px solid #d0d5dd;
-        border-radius: 8px;
-        word-break: break-all;
-      }
-      .link-actions {
-        margin-top: 0.75rem;
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-      }
-      .copy-status {
-        font-size: 0.9rem;
-        color: #475467;
-      }
-      .footer {
-        margin-top: 1rem;
-        font-size: 0.9rem;
-        color: #475467;
-        text-align: center;
-      }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>File Sharing Server</title>
+  <style>
+    body {
+      font-family: Segoe UI, Arial, sans-serif;
+      background: #f2f4f7;
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+    }
+    .card {
+      width: min(560px, 92vw);
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+    }
+    h1 {
+      margin-top: 0;
+    }
+    form {
+      display: grid;
+      gap: 0.75rem;
+    }
+    input,
+    button {
+      font-size: 1rem;
+      padding: 0.6rem;
+    }
+    button {
+      cursor: pointer;
+    }
+    .error {
+      color: #b42318;
+    }
+    .link-box {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      word-break: break-all;
+    }
+    .link-actions {
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .status {
+      font-size: 0.9rem;
+      color: #475467;
+    }
+    .footer {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #475467;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <main class="card">
-      <h1>Share a file</h1>
-      <p>Upload a file. Add a password for encryption. Link works only once.</p>
+  <main class="card">
+    <h1>Share a file</h1>
+    <p>End-to-end encrypted upload. Add a password for recipient-side decryption.</p>
 
-      <% if (error) { %>
-        <p class="error"><%= error %></p>
-      <% } %>
+    <% if (error) { %>
+      <p class="error"><%= error %></p>
+    <% } %>
 
-      <form action="/upload" method="post" enctype="multipart/form-data">
-        <label for="file">File</label>
-        <input type="file" id="file" name="file" required />
+    <form id="upload-form" method="post" action="/upload" enctype="multipart/form-data">
+      <label for="file">File</label>
+      <input type="file" id="file" name="file" required />
 
-        <label for="password">Password (optional)</label>
-        <input type="password" id="password" name="password" />
+      <label for="password">Password (optional)</label>
+      <input type="password" id="password" name="password" />
 
-        <button type="submit">Upload</button>
-      </form>
+      <button id="upload-btn" type="submit">Encrypt & Upload</button>
+      <span id="upload-status" class="status" aria-live="polite"></span>
+    </form>
 
-      <% if (fileLink) { %>
-        <div class="link-box">
-          <strong>Share this link:</strong>
-          <a id="share-link" href="<%= fileLink %>"><%= fileLink %></a>
-          <div class="link-actions">
-            <button id="copy-link-btn" type="button">Copy Link</button>
-            <span id="copy-status" class="copy-status" aria-live="polite"></span>
-          </div>
-        </div>
-      <% } %>
+    <div id="link-box" class="link-box" hidden>
+      <strong>Share this link:</strong>
+      <a id="share-link" href="#"></a>
+      <div class="link-actions">
+        <button id="copy-link-btn" type="button">Copy Link</button>
+        <span id="copy-status" class="status" aria-live="polite"></span>
+      </div>
+    </div>
 
-      <footer class="footer">Developer: Joy G. Majumdar</footer>
-    </main>
+    <footer class="footer">Developer: Joy G. Majumdar</footer>
+  </main>
 
-    <% if (fileLink) { %>
-      <script>
-        (function () {
-          var button = document.getElementById("copy-link-btn");
-          var link = document.getElementById("share-link");
-          var status = document.getElementById("copy-status");
+  <script>
+    (function () {
+      var PBKDF2_ITERATIONS = 210000;
+      var textEncoder = new TextEncoder();
 
-          if (!button || !link || !status) return;
+      var form = document.getElementById("upload-form");
+      var fileInput = document.getElementById("file");
+      var passwordInput = document.getElementById("password");
+      var uploadBtn = document.getElementById("upload-btn");
+      var uploadStatus = document.getElementById("upload-status");
+      var linkBox = document.getElementById("link-box");
+      var shareLink = document.getElementById("share-link");
+      var copyBtn = document.getElementById("copy-link-btn");
+      var copyStatus = document.getElementById("copy-status");
 
-          function setStatus(message) {
-            status.textContent = message;
+      function setUploadStatus(message) {
+        uploadStatus.textContent = message;
+      }
+
+      function setCopyStatus(message) {
+        copyStatus.textContent = message;
+      }
+
+      function toBase64Url(uint8) {
+        var binary = "";
+        for (var i = 0; i < uint8.length; i += 1) {
+          binary += String.fromCharCode(uint8[i]);
+        }
+        return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+      }
+
+      async function deriveKeyFromPassword(password, salt) {
+        var baseKey = await crypto.subtle.importKey(
+          "raw",
+          textEncoder.encode(password),
+          "PBKDF2",
+          false,
+          ["deriveKey"]
+        );
+
+        return crypto.subtle.deriveKey(
+          {
+            name: "PBKDF2",
+            salt: salt,
+            iterations: PBKDF2_ITERATIONS,
+            hash: "SHA-256",
+          },
+          baseKey,
+          {
+            name: "AES-GCM",
+            length: 256,
+          },
+          false,
+          ["encrypt", "decrypt"]
+        );
+      }
+
+      async function importRawAesKey(rawKey) {
+        return crypto.subtle.importKey(
+          "raw",
+          rawKey,
+          {
+            name: "AES-GCM",
+          },
+          false,
+          ["encrypt", "decrypt"]
+        );
+      }
+
+      function buildEnvelope(mode, salt, iv, ciphertext) {
+        // format: magic(4) + version(1) + mode(1) + saltLen(1) + ivLen(1) + salt + iv + ciphertext
+        var header = new Uint8Array(8);
+        header[0] = 70; // F
+        header[1] = 83; // S
+        header[2] = 69; // E
+        header[3] = 49; // 1
+        header[4] = 1;
+        header[5] = mode;
+        header[6] = salt.length;
+        header[7] = iv.length;
+
+        var payload = new Uint8Array(
+          header.length + salt.length + iv.length + ciphertext.length
+        );
+        payload.set(header, 0);
+        payload.set(salt, header.length);
+        payload.set(iv, header.length + salt.length);
+        payload.set(ciphertext, header.length + salt.length + iv.length);
+        return payload;
+      }
+
+      async function encryptForUpload(file, password) {
+        var fileBytes = new Uint8Array(await file.arrayBuffer());
+        var mode = password ? 1 : 2;
+        var salt = password ? crypto.getRandomValues(new Uint8Array(16)) : new Uint8Array(0);
+        var iv = crypto.getRandomValues(new Uint8Array(12));
+        var key;
+        var secretFragment = "";
+
+        if (password) {
+          key = await deriveKeyFromPassword(password, salt);
+        } else {
+          var rawKey = crypto.getRandomValues(new Uint8Array(32));
+          key = await importRawAesKey(rawKey);
+          secretFragment = "#k=" + toBase64Url(rawKey);
+        }
+
+        var encrypted = await crypto.subtle.encrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          fileBytes
+        );
+
+        var envelope = buildEnvelope(mode, salt, iv, new Uint8Array(encrypted));
+        return {
+          payload: envelope,
+          secretFragment: secretFragment,
+        };
+      }
+
+      async function handleUpload(event) {
+        event.preventDefault();
+        setUploadStatus("");
+        setCopyStatus("");
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+          setUploadStatus("Please select a file.");
+          return;
+        }
+
+        var file = fileInput.files[0];
+        var password = passwordInput.value || "";
+
+        uploadBtn.disabled = true;
+        setUploadStatus("Encrypting file in your browser...");
+
+        try {
+          var encrypted = await encryptForUpload(file, password);
+
+          var formData = new FormData();
+          formData.append(
+            "file",
+            new Blob([encrypted.payload], { type: "application/octet-stream" }),
+            file.name + ".e2e"
+          );
+          formData.append("originalName", file.name);
+          if (password) {
+            formData.append("password", password);
           }
 
-          button.addEventListener("click", async function () {
-            try {
-              if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(link.href);
-              } else {
-                var tempInput = document.createElement("input");
-                tempInput.value = link.href;
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                document.execCommand("copy");
-                document.body.removeChild(tempInput);
-              }
-              setStatus("Link copied.");
-            } catch (error) {
-              setStatus("Copy failed. Please copy manually.");
-            }
+          setUploadStatus("Uploading encrypted file...");
+          var response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
           });
-        })();
-      </script>
-    <% } %>
+
+          var data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || "Upload failed.");
+          }
+
+          var baseUrl = data.baseUrl || window.location.origin;
+          var link = baseUrl + "/file/" + data.id + encrypted.secretFragment;
+          shareLink.href = link;
+          shareLink.textContent = link;
+          linkBox.hidden = false;
+          setUploadStatus("Upload complete.");
+        } catch (error) {
+          setUploadStatus(error.message || "Upload failed.");
+        } finally {
+          uploadBtn.disabled = false;
+        }
+      }
+
+      async function copyLink() {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(shareLink.href);
+          } else {
+            var tempInput = document.createElement("input");
+            tempInput.value = shareLink.href;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+          }
+          setCopyStatus("Link copied.");
+        } catch (error) {
+          setCopyStatus("Copy failed. Please copy manually.");
+        }
+      }
+
+      form.addEventListener("submit", handleUpload);
+      copyBtn.addEventListener("click", copyLink);
+    })();
+  </script>
 </body>
 </html>

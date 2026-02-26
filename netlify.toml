@@ -8,6 +8,18 @@
   included_files = ["views/**"]
 
 [[redirects]]
+  from = "https://sharefile0x1.netlify.app/*"
+  to = "http://burnlink.page/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://sharefile0x1.netlify.app/*"
+  to = "http://burnlink.page/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/"
   to = "/.netlify/functions/app"
   status = 200
