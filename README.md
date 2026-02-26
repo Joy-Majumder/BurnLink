@@ -1,27 +1,10 @@
 # File Sharing Server
 
-Simple Node.js + Express file sharing server with:
-- Optional password-based encrypted file storage
-- One-time download links (burn after first successful download)
-- Supabase (Postgres)-backed file metadata
+One-time file sharing app.
 
-## Setup
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. In Supabase SQL Editor, run the script in:
-   `SUPABASE_SQL_EDITOR.md`
-3. Configure `.env` (copy from `.env.example`):
-   ```env
-   SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
-   SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
-   SUPABASE_FILES_TABLE=files
-   PORT=3000
-   PORT_RETRIES=10
-   ```
-4. Replace placeholders with real Supabase values.
-5. Start:
-   ```bash
-   npm run dev
-   ```
+## Features
+- Upload file and generate a shareable URL.
+- Optional password protection (encrypts uploaded file on disk).
+- One-time download links (file and DB record are removed after successful download).
+- Copy-link button in UI for fast sharing.
+

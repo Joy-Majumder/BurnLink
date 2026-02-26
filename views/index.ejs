@@ -45,6 +45,16 @@
         border-radius: 8px;
         word-break: break-all;
       }
+      .link-actions {
+        margin-top: 0.75rem;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .copy-status {
+        font-size: 0.9rem;
+        color: #475467;
+      }
       .footer {
         margin-top: 1rem;
         font-size: 0.9rem;
@@ -75,11 +85,49 @@
       <% if (fileLink) { %>
         <div class="link-box">
           <strong>Share this link:</strong>
-          <a href="<%= fileLink %>"><%= fileLink %></a>
+          <a id="share-link" href="<%= fileLink %>"><%= fileLink %></a>
+          <div class="link-actions">
+            <button id="copy-link-btn" type="button">Copy Link</button>
+            <span id="copy-status" class="copy-status" aria-live="polite"></span>
+          </div>
         </div>
       <% } %>
 
       <footer class="footer">Developer: Joy G. Majumdar</footer>
     </main>
+
+    <% if (fileLink) { %>
+      <script>
+        (function () {
+          var button = document.getElementById("copy-link-btn");
+          var link = document.getElementById("share-link");
+          var status = document.getElementById("copy-status");
+
+          if (!button || !link || !status) return;
+
+          function setStatus(message) {
+            status.textContent = message;
+          }
+
+          button.addEventListener("click", async function () {
+            try {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(link.href);
+              } else {
+                var tempInput = document.createElement("input");
+                tempInput.value = link.href;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
+              }
+              setStatus("Link copied.");
+            } catch (error) {
+              setStatus("Copy failed. Please copy manually.");
+            }
+          });
+        })();
+      </script>
+    <% } %>
 </body>
 </html>
