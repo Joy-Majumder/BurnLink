@@ -5,7 +5,7 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["ejs"]
-  included_files = ["views/**"]
+  included_files = ["views/**", "public/**"]
 
 [[redirects]]
   from = "https://sharefile0x1.netlify.app/*"
