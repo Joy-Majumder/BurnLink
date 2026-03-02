@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo1.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="BurnLink — Share files. Encrypted. Ephemeral. Files are encrypted in your browser and burned after the first download." />
   <meta name="keywords" content="encrypted file sharing, secure file transfer, e2e encryption, privacy, burnlink" />
@@ -26,7 +27,8 @@
       position: sticky; top: 0; background: #0a0a0a; z-index: 100;
     }
     .header-content { display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-size: 1rem; font-weight: 700; color: #ff8c00; text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; }
+    .logo { text-decoration: none; display: flex; align-items: center; }
+    .logo img { height: 45px; width: auto; display: block; }
     nav { display: flex; gap: 2.5rem; }
     nav a { text-decoration: none; color: #666; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.2s; }
     nav a:hover, nav a.active { color: #fff; }
@@ -96,7 +98,7 @@
   <header>
     <div class="container">
       <div class="header-content">
-        <a href="/" class="logo">BurnLink</a>
+        <a href="/" class="logo"><img src="/logo1.png" alt="BurnLink" /></a>
         <nav><a href="/" class="active">Home</a><a href="/about">About</a><a href="/security-policy">Security policy</a></nav>
       </div>
     </div>
@@ -175,12 +177,13 @@
         </div>
         <div class="footer-section">
           <h3>Developer</h3>
-          <a href="https://github.com/Joy-Majumder" target="_blank" rel="noopener noreferrer">Joy Majumdar</a>
+          <a href="https://github.com/Joy-Majumder" target="_blank" rel="noopener noreferrer">Joy G. Majumdar</a>
           <a href="https://github.com/Joy-Majumder/BurnLink" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://paperfrogs.dev" target="_blank" rel="noopener noreferrer">Paperfrogs Labs</a>
         </div>
       </div>
       <div class="footer-bottom" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
-        <p>&copy; 2026 BurnLink. Share files. Encrypted. Ephemeral.</p>
+        <p>&copy; 2026 BurnLink &mdash; A <a href="https://paperfrogs.dev" target="_blank" rel="noopener noreferrer" style="color:#555;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#555'">Paperfrogs Labs</a> product</p>
         <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
           <a href="https://www.producthunt.com/products/burnlink-page?utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-burnlink" target="_blank" rel="noopener noreferrer">
             <img alt="BurnLink on Product Hunt" width="200" height="43" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1086612&theme=dark&t=1772468459571" style="display:block;" />

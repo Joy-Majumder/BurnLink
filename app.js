@@ -304,7 +304,7 @@ app.get("/hall-of-fame", (req, res) => {
 app.get("/.well-known/security.txt", (req, res) => {
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
   res.send([
-    "Contact: mailto:security@burnlink.page",
+    "Contact: mailto:hello@paperfrogs.dev",
     "Expires: 2027-01-01T00:00:00.000Z",
     "Preferred-Languages: en",
     "Canonical: https://burnlink.page/.well-known/security.txt",
