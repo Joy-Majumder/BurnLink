@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const express = require("express");
 const multer = require("multer");
 const File = require("./models/File");
+const { dbRateLimit } = require("./models/RateLimit");
 const supabase = require("./lib/supabase");
 
 const app = express();
@@ -291,6 +292,14 @@ app.get("/about", (req, res) => {
   res.render("about");
 });
 
+app.get("/security-policy", (req, res) => {
+  res.render("security-policy");
+});
+
+app.get("/hall-of-fame", (req, res) => {
+  res.render("hall-of-fame");
+});
+
 // ── Responsible disclosure policy ─────────────────────────────────────────
 app.get("/.well-known/security.txt", (req, res) => {
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
@@ -430,7 +439,7 @@ app.get("/file/:id/raw", rateLimit(15, 60 * 1000), async (req, res) => {
   }
 });
 
-app.post("/file/:id/raw", rateLimit(20, 60 * 1000), async (req, res) => {
+app.post("/file/:id/raw", dbRateLimit(20, 60 * 1000), async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
 

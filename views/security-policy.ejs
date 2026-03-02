@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="BurnLink Security Policy — responsible disclosure, scope, and how to report vulnerabilities." />
+  <meta name="theme-color" content="#0a0a0a" />
+  <title>Security Policy - BurnLink</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0a0a0a; color: #fff; line-height: 1.6; overflow-x: hidden; min-height: 100vh; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+    header { padding: 1.75rem 0; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; background: #0a0a0a; z-index: 100; }
+    .header-content { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1rem; font-weight: 700; color: #ff8c00; text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; }
+    nav { display: flex; gap: 2.5rem; }
+    nav a { text-decoration: none; color: #666; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.2s; }
+    nav a:hover, nav a.active { color: #fff; }
+    footer { border-top: 1px solid #1e1e1e; padding: 3rem 0; }
+    .footer-content { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-bottom: 2rem; }
+    .footer-section h3 { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin-bottom: 1rem; color: #555; }
+    .footer-section a { display: block; color: #777; text-decoration: none; font-size: 0.85rem; margin-bottom: 0.5rem; transition: color 0.2s; }
+    .footer-section a:hover { color: #fff; }
+    .footer-bottom { border-top: 1px solid #1e1e1e; padding-top: 1.5rem; color: #444; font-size: 0.78rem; }
+    main { padding: 6rem 0 4rem; min-height: calc(100vh - 140px); }
+    .policy-content { max-width: 700px; }
+    h1 { font-size: 3rem; line-height: 1.05; font-weight: 800; letter-spacing: -2px; color: #fff; margin-bottom: 1.5rem; }
+    .intro { font-size: 0.95rem; color: #888; line-height: 1.8; margin-bottom: 3rem; }
+    h2 { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-top: 3rem; margin-bottom: 1.25rem; border-top: 1px solid #1e1e1e; padding-top: 2rem; }
+    h2:first-of-type { border-top: none; padding-top: 0; }
+    .plain-list { list-style: none; border-top: 1px solid #1e1e1e; }
+    .plain-list li { padding: 0.85rem 0; font-size: 0.9rem; color: #aaa; border-bottom: 1px solid #1e1e1e; display: flex; gap: 0.75rem; align-items: flex-start; }
+    .plain-list li::before { content: ""; display: inline-block; width: 4px; height: 4px; background: #ff8c00; border-radius: 50%; flex-shrink: 0; margin-top: 0.55rem; }
+    .plain-list.oos li::before { background: #444; }
+    .contact-box { border: 1px solid #1e1e1e; padding: 1.75rem; margin-top: 2rem; }
+    .contact-box p { font-size: 0.85rem; color: #888; line-height: 1.8; margin-bottom: 0.75rem; }
+    .contact-box a { color: #ff8c00; text-decoration: none; font-weight: 600; }
+    .contact-box a:hover { text-decoration: underline; }
+    .recog-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #1e1e1e; border: 1px solid #1e1e1e; margin: 1.5rem 0; }
+    .recog-item { background: #0a0a0a; padding: 1.25rem; }
+    .recog-item .level { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    .recog-item .level.critical { color: #ff4444; }
+    .recog-item .level.high { color: #ff8c00; }
+    .recog-item .level.medium { color: #ffd700; }
+    .recog-item .level.low { color: #aaa; }
+    .recog-item .recog-label { font-size: 0.82rem; font-weight: 600; color: #ccc; }
+    .tag { display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.6rem; border: 1px solid #333; color: #888; margin-right: 0.4rem; margin-bottom: 0.4rem; }
+    .notice { background: #0e0e00; border: 1px solid #2a2a00; padding: 1rem 1.25rem; font-size: 0.83rem; color: #cccc00; line-height: 1.7; margin-top: 2rem; }
+    .cta-row { display: flex; gap: 1.5rem; margin-top: 3rem; flex-wrap: wrap; }
+    .btn { display: inline-block; padding: 0.8rem 1.5rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; transition: opacity 0.2s; }
+    .btn-primary { background: #ff8c00; color: #000; }
+    .btn-ghost { background: transparent; color: #aaa; border: 1px solid #333; }
+    .btn:hover { opacity: 0.8; }
+    @media (max-width: 768px) {
+      nav { gap: 1.5rem; }
+      .header-content { flex-wrap: wrap; gap: 1rem; }
+      .footer-content { grid-template-columns: 1fr; gap: 1.5rem; }
+      main { padding: 3rem 0 2rem; }
+      h1 { font-size: 2.25rem; letter-spacing: -1px; }
+      .recog-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="5557b587-f2e2-4eb6-8edd-582164ff68da"></script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <a href="/" class="logo">BurnLink</a>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/about">About</a>
+          <a href="/security-policy" class="active">Security policy</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="policy-content">
+        <h1>Security Policy</h1>
+        <p class="intro">BurnLink takes security seriously. If you discover a vulnerability, we ask that you report it to us privately before disclosing it publicly. We will acknowledge your report within 48 hours and work to resolve confirmed issues promptly.</p>
+
+        <h2>How to report</h2>
+        <div class="contact-box">
+          <p>Send a detailed report to <a href="mailto:security@burnlink.page">security@burnlink.page</a>. Please include:</p>
+          <p>A description of the vulnerability, steps to reproduce it, the potential impact, and any proof-of-concept code or screenshots. We will respond within 48 hours and keep you updated throughout remediation.</p>
+        </div>
+
+        <h2>In scope</h2>
+        <ul class="plain-list">
+          <li>Client-side cryptographic implementation flaws that expose plaintext data</li>
+          <li>One-time link bypass — race conditions, caching, or replay attacks</li>
+          <li>IDOR (Insecure Direct Object Reference) on <code style="color:#ff8c00;background:#111;padding:0.1rem 0.35rem;">/api/</code> endpoints</li>
+          <li>Password protection logic flaws (brute-force bypass, timing attacks)</li>
+          <li>Authentication or authorization bypasses</li>
+          <li>Cross-site scripting (XSS) that can steal keys or hijack sessions</li>
+          <li>Server-side request forgery (SSRF)</li>
+          <li>Sensitive data leakage (metadata, filenames, encryption keys)</li>
+        </ul>
+
+        <h2>Out of scope</h2>
+        <ul class="plain-list oos">
+          <li>Denial-of-service attacks, volumetric flooding</li>
+          <li>Social engineering or phishing of BurnLink staff</li>
+          <li>Vulnerabilities in third-party dependencies unless directly chainable to data loss or RCE</li>
+          <li>Self-XSS with no realistic attack vector</li>
+          <li>Missing HTTP headers without a demonstrable exploit</li>
+          <li>Rate limiting on non-sensitive endpoints</li>
+          <li>Physical security</li>
+        </ul>
+
+        <h2>Recognition</h2>
+        <p style="font-size:0.85rem;color:#777;margin-bottom:1.25rem;">We do not offer monetary bounties. Instead, valid reporters are recognized publicly in our Hall of Fame (with their consent) and receive the following acknowledgements based on severity:</p>
+        <div class="recog-grid">
+          <div class="recog-item">
+            <div class="level critical">Critical</div>
+            <div class="recog-label">Hall of Fame + Special Thanks</div>
+          </div>
+          <div class="recog-item">
+            <div class="level high">High</div>
+            <div class="recog-label">Hall of Fame + Shoutout</div>
+          </div>
+          <div class="recog-item">
+            <div class="level medium">Medium</div>
+            <div class="recog-label">Hall of Fame</div>
+          </div>
+          <div class="recog-item">
+            <div class="level low">Low / Info</div>
+            <div class="recog-label">Honorable Mention</div>
+          </div>
+        </div>
+        <p style="font-size:0.82rem;color:#555;margin-top:0.75rem;">First reporter of a valid, previously unknown issue is eligible. Duplicate reports are not. You may opt for anonymous credit if you prefer not to be named.</p>
+
+        <h2>Scope</h2>
+        <p style="font-size:0.85rem;color:#777;margin-bottom:1rem;">The following hosts are in scope:</p>
+        <div>
+          <span class="tag">burnlink.page</span>
+          <span class="tag">*.burnlink.page</span>
+        </div>
+
+        <h2>Rules of engagement</h2>
+        <ul class="plain-list">
+          <li>Do not access, modify, or delete data that does not belong to you</li>
+          <li>Do not perform active exploitation against real users or their files</li>
+          <li>Do not perform denial-of-service testing against production systems</li>
+          <li>Give us reasonable time to remediate before any public disclosure</li>
+          <li>Act in good faith — we will do the same</li>
+        </ul>
+
+        <div class="notice">
+          BurnLink's primary security promise is that the raw encryption key never leaves your browser and that one-time links are truly one-time. Any finding that breaks either of these guarantees will be treated as critical severity regardless of CVSS score.
+        </div>
+
+        <h2>Hall of Fame</h2>
+        <p style="font-size:0.875rem;color:#888;line-height:1.8;">Security researchers who responsibly disclosed valid vulnerabilities and helped make BurnLink safer are recognized on our dedicated Hall of Fame page, along with the full findings log.</p>
+        <div class="cta-row" style="margin-top:1.25rem;">
+          <a href="/hall-of-fame" class="btn btn-ghost">View Hall of Fame &amp; Findings Log &rarr;</a>
+        </div>
+
+        <div class="cta-row">
+          <a href="mailto:security@burnlink.page" class="btn btn-primary">Report a vulnerability</a>
+          <a href="/hall-of-fame" class="btn btn-ghost">Hall of Fame</a>
+          <a href="/.well-known/security.txt" class="btn btn-ghost">security.txt</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Product</h3>
+          <a href="/">Share files</a>
+          <a href="/about">How it works</a>
+          <a href="/security-policy">Security policy</a>
+        </div>
+        <div class="footer-section">
+          <h3>Security</h3>
+          <a href="/security-policy">Security policy</a>
+          <a href="/hall-of-fame">Hall of fame</a>
+        </div>
+        <div class="footer-section">
+          <h3>Developer</h3>
+          <a href="https://github.com/Joy-Majumder" target="_blank" rel="noopener noreferrer">Joy Majumdar</a>
+          <a href="https://github.com/Joy-Majumder/BurnLink" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+          <p>&copy; 2026 BurnLink. Share files. Encrypted. Ephemeral.</p>
+          <a href="https://www.producthunt.com/products/burnlink-page?utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-burnlink" target="_blank" rel="noopener noreferrer">
+            <img alt="BurnLink on Product Hunt" width="200" height="43" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1086612&theme=dark&t=1772468459571" style="display:block;" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
