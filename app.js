@@ -9,6 +9,7 @@ const File = require("./models/File");
 const supabase = require("./lib/supabase");
 
 const app = express();
+app.disable("x-powered-by");
 const storageBucket = process.env.SUPABASE_STORAGE_BUCKET || "files";
 const canonicalBaseUrl = process.env.CANONICAL_BASE_URL || "https://burnlink.page";
 const configuredMaxUploadBytes = Number(process.env.MAX_UPLOAD_BYTES || 0);
@@ -136,7 +137,9 @@ function isLocalHost(hostname) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
 }
 
-app.use(express.urlencoded({ extended: true }));
+// Strict body size limits — prevent oversized request attacks
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(express.json({ limit: "16kb" }));
 app.set("view engine", "ejs");
 app.set("views", resolveViewsDirectory());
 
@@ -161,6 +164,95 @@ function resolvePublicDirectory() {
 }
 
 app.use(express.static(resolvePublicDirectory()));
+
+// ── Security headers + CSP nonce ───────────────────────────────────────────
+app.use((req, res, next) => {
+  const nonce = crypto.randomBytes(16).toString("base64");
+  res.locals.cspNonce = nonce;
+
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+  res.setHeader("X-XSS-Protection", "0"); // disabled — CSP is the correct defence
+  res.setHeader("Content-Security-Policy", [
+    "default-src 'none'",
+    `script-src 'self' 'nonce-${nonce}'`,
+    "style-src 'unsafe-inline'",
+    "img-src 'self' blob: data:",
+    "media-src 'self' blob:",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "frame-src blob:",
+    "form-action 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+  ].join("; "));
+
+  if (req.secure || req.headers["x-forwarded-proto"] === "https") {
+    res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  }
+
+  next();
+});
+
+// ── In-memory rate limiter (no external package needed) ────────────────────
+const _rlMap = new Map();
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of _rlMap) {
+    if (now > v.resetAt) _rlMap.delete(k);
+  }
+}, 60_000).unref();
+
+function rateLimit(maxRequests, windowMs) {
+  return (req, res, next) => {
+    // Trust X-Forwarded-For ONLY if it looks like a single valid IP
+    // An attacker can spoof multi-value headers like "1.2.3.4, 5.6.7.8"
+    // We only trust it when there is exactly one value (set by a real proxy)
+    const fwdRaw = (req.headers["x-forwarded-for"] || "").trim();
+    const fwdParts = fwdRaw.split(",").map(s => s.trim()).filter(Boolean);
+    const ip =
+      (fwdParts.length === 1 ? fwdParts[0] : null) ||
+      req.socket?.remoteAddress ||
+      "unknown";
+
+    // Rate limit key is per-IP + per-ROUTE (not per file UUID)
+    // Strip UUIDs from path so all /file/*/raw share one bucket per IP
+    const routeKey = req.path.replace(
+      /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+      ":id"
+    );
+    const key = ip + ":" + routeKey;
+    const now = Date.now();
+    const entry = _rlMap.get(key);
+    if (!entry || now > entry.resetAt) {
+      _rlMap.set(key, { count: 1, resetAt: now + windowMs });
+      return next();
+    }
+    if (entry.count >= maxRequests) {
+      res.setHeader("Retry-After", String(Math.ceil((entry.resetAt - now) / 1000)));
+      const isApi = req.path.startsWith("/api") || req.path.includes("/raw") || req.path.includes("/burn");
+      return isApi
+        ? res.status(429).json({ error: "Too many requests. Please slow down." })
+        : res.status(429).send("Too many requests.");
+    }
+    entry.count++;
+    return next();
+  };
+}
+
+// ── UUID format validation — blocks DB lookup on garbage IDs ───────────────
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+app.param("id", (req, res, next, id) => {
+  if (!UUID_RE.test(id)) {
+    const wantsJson = req.method === "POST" || req.path.endsWith("/raw") || req.path.endsWith("/burn");
+    return wantsJson
+      ? res.status(404).json({ error: "Not found." })
+      : res.status(404).render("not-found");
+  }
+  next();
+});
 
 app.use((req, res, next) => {
   if (!canonicalUrl || !enforceCanonicalRedirect) {
@@ -189,28 +281,25 @@ app.get("/about", (req, res) => {
 });
 
 app.get("/health", async (req, res) => {
-  const supabaseUrl = process.env.SUPABASE_URL || "";
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-  const bucket = process.env.SUPABASE_STORAGE_BUCKET || "";
+  // Require a secret token to access internal health details
+  const healthToken = process.env.HEALTH_TOKEN || "";
+  const providedToken = (req.headers["authorization"] || "").replace(/^Bearer\s+/i, "");
 
-  const status = {
-    url: supabaseUrl ? supabaseUrl.slice(0, 30) + "..." : "MISSING",
-    keyLength: supabaseKey.length,
-    bucket: bucket || "MISSING",
-    db: "untested",
-  };
+  const authed = healthToken.length > 0 && providedToken === healthToken;
 
   try {
     const { error } = await supabase.from(process.env.SUPABASE_FILES_TABLE || "files").select("id").limit(1);
-    status.db = error ? "FAIL: " + error.message : "OK";
+    const dbOk = !error;
+    if (authed) {
+      return res.json({ status: "ok", db: dbOk ? "ok" : "fail: " + error.message });
+    }
+    return res.json({ status: dbOk ? "ok" : "degraded" });
   } catch (e) {
-    status.db = "THROW: " + e.message;
+    return res.status(503).json({ status: "error" });
   }
-
-  res.json(status);
 });
 
-app.post("/api/upload", upload.single("file"), async (req, res) => {
+app.post("/api/upload", rateLimit(10, 10 * 60 * 1000), upload.single("file"), async (req, res) => {
   let storagePath = null;
 
   try {
@@ -220,9 +309,11 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
       });
     }
 
-    const originalName = req.body.originalName?.trim() || req.file.originalname || "file";
+    const originalName = (req.body.originalName?.trim() || req.file.originalname || "file").slice(0, 255);
     const rawPassword = req.body.password?.trim() || "";
-    const mode = req.body.mode?.trim() || "download";
+    // Whitelist mode — reject anything not in the allowed set
+    const rawMode = req.body.mode?.trim() || "";
+    const mode = (rawMode === "view-once" || rawMode === "download") ? rawMode : "download";
     const payload = req.file.buffer;
 
     if (
@@ -265,7 +356,6 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 
     return res.status(500).json({
       error: "Upload failed. Please try again.",
-      detail: errMsg,
     });
   }
 });
@@ -293,7 +383,7 @@ app.get("/file/:id", async (req, res) => {
   }
 });
 
-app.get("/file/:id/raw", async (req, res) => {
+app.get("/file/:id/raw", rateLimit(15, 60 * 1000), async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
 
@@ -313,7 +403,7 @@ app.get("/file/:id/raw", async (req, res) => {
   }
 });
 
-app.post("/file/:id/raw", async (req, res) => {
+app.post("/file/:id/raw", rateLimit(20, 60 * 1000), async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
 
@@ -366,8 +456,18 @@ app.post("/file/:id/raw", async (req, res) => {
 });
 
 // Explicit burn endpoint — called by client when view-once timer expires or user closes
-app.post("/file/:id/burn", async (req, res) => {
+// Requires the file's own UUID as proof of possession (unguessable, 122 bits entropy)
+// Additional protection: checks the Referer header is same-origin
+app.post("/file/:id/burn", rateLimit(10, 60 * 1000), async (req, res) => {
   const id = req.params.id;
+
+  // Block cross-origin burn requests (basic CSRF protection)
+  const referer = req.headers["referer"] || req.headers["origin"] || "";
+  const host = (req.headers["x-forwarded-host"] || req.headers["host"] || "").split(":")[0];
+  if (referer && !referer.includes(host)) {
+    return res.status(403).json({ ok: false, error: "Forbidden." });
+  }
+
   console.log(`[burn] Request received for file id=${id}`);
   try {
     const file = await File.findById(id);
@@ -383,7 +483,7 @@ app.post("/file/:id/burn", async (req, res) => {
     return res.json({ ok: true });
   } catch (error) {
     console.error(`[burn] ERROR for id=${id}:`, error.message, error.stack);
-    return res.status(500).json({ ok: false, error: error.message || "Burn failed." });
+    return res.status(500).json({ ok: false, error: "Burn failed." });
   }
 });
 
