@@ -260,10 +260,12 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
       await removeFromStorage(storagePath);
     }
 
-    console.error("Upload error details:", error); // Log the actual error
+    const errMsg = error?.message || String(error);
+    console.error("Upload error details:", errMsg);
 
     return res.status(500).json({
       error: "Upload failed. Please try again.",
+      detail: errMsg,
     });
   }
 });

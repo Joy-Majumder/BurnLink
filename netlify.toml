@@ -7,6 +7,9 @@
   external_node_modules = ["ejs"]
   included_files = ["views/**", "public/**"]
 
+[functions."app"]
+  node_bundler = "esbuild"
+
 [[redirects]]
   from = "https://sharefile0x1.netlify.app/*"
   to = "https://burnlink.page/:splat"
