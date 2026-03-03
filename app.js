@@ -9,16 +9,21 @@ const File = require("./models/File");
 const { dbRateLimit } = require("./models/RateLimit");
 const supabase = require("./lib/supabase");
 
+const { uploadToStorage, downloadFromStorage, removeFromStorage, getPresignedPutUrl, getFirstBytes } = require("./lib/r2");
+
 const app = express();
 app.disable("x-powered-by");
-const storageBucket = process.env.SUPABASE_STORAGE_BUCKET || "files";
 const canonicalBaseUrl = process.env.CANONICAL_BASE_URL || "https://burnlink.page";
-const configuredMaxUploadBytes = Number(process.env.MAX_UPLOAD_BYTES || 0);
+const MAX_UPLOAD_BYTES = 1 * 1024 * 1024 * 1024; // 1 GB hard cap
+const configuredMaxUploadBytes = Number(process.env.MAX_UPLOAD_BYTES || MAX_UPLOAD_BYTES);
 const hasAppUploadLimit =
   Number.isFinite(configuredMaxUploadBytes) && configuredMaxUploadBytes > 0;
 const PASSWORD_MAX_ATTEMPTS = 3;
 const PASSWORD_LOCK_MINUTES = 10;
 const enforceCanonicalRedirect = process.env.ENFORCE_CANONICAL_REDIRECT === "true";
+const r2CspOrigin = process.env.R2_ACCOUNT_ID
+  ? `https://*.r2.cloudflarestorage.com`
+  : null;
 
 let canonicalUrl = null;
 try {
@@ -42,43 +47,7 @@ function buildStoragePath(originalName) {
   return `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}-${safeName}`;
 }
 
-async function uploadToStorage(storagePath, buffer) {
-  const { error } = await supabase.storage
-    .from(storageBucket)
-    .upload(storagePath, buffer, {
-      contentType: "application/octet-stream",
-      upsert: false,
-    });
-
-  if (error) {
-    throw new Error(`Storage upload failed: ${error.message}`);
-  }
-}
-
-async function downloadFromStorage(storagePath) {
-  const { data, error } = await supabase.storage
-    .from(storageBucket)
-    .download(storagePath);
-
-  if (error) {
-    throw new Error(`Storage download failed: ${error.message}`);
-  }
-
-  const arrayBuffer = await data.arrayBuffer();
-  return Buffer.from(arrayBuffer);
-}
-
-async function removeFromStorage(storagePath) {
-  if (!storagePath) return;
-
-  const { error } = await supabase.storage
-    .from(storageBucket)
-    .remove([storagePath]);
-
-  if (error && !/not found/i.test(error.message)) {
-    console.error(`Storage delete failed for ${storagePath}:`, error.message);
-  }
-}
+// uploadToStorage, downloadFromStorage, removeFromStorage are imported from lib/r2.js
 
 async function sendOneTimeEncryptedFile(res, file) {
   // Check if view-once file has expired
@@ -194,7 +163,7 @@ app.use((req, res, next) => {
     "img-src 'self' blob: data: https://api.producthunt.com",
     "media-src 'self' blob:",
     "font-src 'self'",
-    "connect-src 'self' https://cloud.umami.is",
+    `connect-src 'self' https://cloud.umami.is${r2CspOrigin ? " " + r2CspOrigin : ""}`,
     "frame-src blob:",
     "form-action 'self'",
     "base-uri 'self'",
@@ -218,6 +187,10 @@ setInterval(() => {
 }, 60_000).unref();
 
 function rateLimit(maxRequests, windowMs) {
+  // Skip rate limiting in local development
+  if (process.env.NODE_ENV !== "production" && process.env.ENABLE_RATE_LIMIT !== "true") {
+    return (req, res, next) => next();
+  }
   return (req, res, next) => {
     // Trust X-Forwarded-For ONLY if it looks like a single valid IP
     // An attacker can spoof multi-value headers like "1.2.3.4, 5.6.7.8"
@@ -335,6 +308,78 @@ app.get("/health", async (req, res) => {
   }
 });
 
+// ── Phase 2: presign + commit (direct browser → R2 upload, no Netlify 6MB cap) ──
+
+// Validates storagePath format to prevent path traversal on commit
+const STORAGE_PATH_RE = /^\d{4}-\d{2}-\d{2}\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}-[\w.\-]+$/i;
+
+// Step 1 — browser asks for a signed PUT URL
+app.get("/api/presign", rateLimit(30, 10 * 60 * 1000), async (req, res) => {
+  try {
+    const filesize = Number(req.query.filesize || 0);
+    if (filesize > MAX_UPLOAD_BYTES) {
+      return res.status(413).json({ error: "File too large. Maximum upload size is 1 GB." });
+    }
+    const rawName = (req.query.filename || "file").toString().trim().slice(0, 255);
+    const storagePath = buildStoragePath(rawName);
+    const uploadUrl = await getPresignedPutUrl(storagePath, 900); // 15 min
+    return res.json({ uploadUrl, storagePath });
+  } catch (err) {
+    console.error("Presign error:", err.message);
+    return res.status(500).json({ error: "Could not generate upload URL." });
+  }
+});
+
+// Step 2 — browser calls this after it finishes the direct PUT to R2
+app.post("/api/commit", rateLimit(30, 10 * 60 * 1000), async (req, res) => {
+  const { storagePath, originalName, mode: rawMode, password: rawPassword } = req.body;
+
+  if (!storagePath || !STORAGE_PATH_RE.test(storagePath)) {
+    return res.status(400).json({ error: "Invalid storage path." });
+  }
+
+  const originalNameClean = (originalName || "file").toString().trim().slice(0, 255);
+  const mode = (rawMode === "view-once" || rawMode === "download") ? rawMode : "download";
+
+  // Verify the file actually landed in R2 and validate FSE1 magic header
+  let firstBytes;
+  try {
+    firstBytes = await getFirstBytes(storagePath, 4);
+  } catch (err) {
+    return res.status(400).json({ error: "Upload not found in storage. Please try uploading again." });
+  }
+
+  if (
+    firstBytes.length < 4 ||
+    firstBytes[0] !== 70 ||
+    firstBytes[1] !== 83 ||
+    firstBytes[2] !== 69 ||
+    firstBytes[3] !== 49
+  ) {
+    await removeFromStorage(storagePath).catch(() => {});
+    return res.status(400).json({ error: "Invalid payload. File must be encrypted client-side before upload." });
+  }
+
+  try {
+    const file = await File.createFile({
+      path: storagePath,
+      originalName: originalNameClean,
+      password: rawPassword?.trim() || undefined,
+      mode,
+    });
+
+    const shareBaseUrl = canonicalUrl
+      ? canonicalUrl.origin
+      : `${req.protocol}://${req.get("host")}`;
+
+    return res.status(201).json({ id: file.id, baseUrl: shareBaseUrl });
+  } catch (err) {
+    console.error("Commit error:", err.message);
+    await removeFromStorage(storagePath).catch(() => {});
+    return res.status(500).json({ error: "Upload failed. Please try again." });
+  }
+});
+
 app.post("/api/upload", rateLimit(10, 10 * 60 * 1000), upload.single("file"), async (req, res) => {
   let storagePath = null;
 
@@ -400,20 +445,87 @@ app.post("/upload", upload.single("file"), (req, res) => {
   return res.redirect("/?error=JavaScript+is+required+for+encrypted+uploads.+Please+enable+JavaScript+and+try+again.");
 });
 
-app.get("/file/:id", async (req, res) => {
+// ── /s/:id — new short share URL ────────────────────────────────────────
+app.get("/s/:id", async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
-
-    if (!file) {
-      return res.status(404).render("not-found");
-    }
-
+    if (!file) return res.status(404).render("not-found");
     return res.render("password", {
       error: null,
       fileId: file.id,
       requiresPassword: Boolean(file.password),
       mode: file.mode || "download",
     });
+  } catch (error) {
+    return res.status(400).render("not-found");
+  }
+});
+
+app.get("/s/:id/raw", rateLimit(15, 60 * 1000), async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file) return res.status(404).render("not-found");
+    if (file.password) return res.status(401).json({ error: "Password required." });
+    return sendOneTimeEncryptedFile(res, file);
+  } catch (error) {
+    return res.status(400).json({ error: "Failed to download file." });
+  }
+});
+
+app.post("/s/:id/raw", dbRateLimit(20, 60 * 1000), async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file) return res.status(404).json({ error: "File not found." });
+    if (!file.password) return sendOneTimeEncryptedFile(res, file);
+    const activeLockUntilMs = getActiveLock(file);
+    if (activeLockUntilMs) {
+      const remainingMinutes = Math.ceil((activeLockUntilMs - Date.now()) / 60000);
+      return res.status(423).json({ error: `File is locked. Try again in ${remainingMinutes} minute(s).` });
+    }
+    const submittedPassword = req.body.password || "";
+    const passwordOk = await File.comparePassword(file, submittedPassword);
+    if (!passwordOk) {
+      const nextFailedAttempts = (file.failedAttempts || 0) + 1;
+      if (nextFailedAttempts >= PASSWORD_MAX_ATTEMPTS) {
+        const lockUntil = new Date(Date.now() + PASSWORD_LOCK_MINUTES * 60 * 1000).toISOString();
+        await File.updateLockState(file.id, 0, lockUntil);
+        return res.status(423).json({ error: `Too many wrong passwords. File locked for ${PASSWORD_LOCK_MINUTES} minutes.` });
+      }
+      await File.updateLockState(file.id, nextFailedAttempts, null);
+      const remaining = PASSWORD_MAX_ATTEMPTS - nextFailedAttempts;
+      return res.status(401).json({ error: `Wrong password. ${remaining} attempt(s) left before lock.` });
+    }
+    await File.updateLockState(file.id, 0, null);
+    return sendOneTimeEncryptedFile(res, file);
+  } catch (error) {
+    return res.status(400).json({ error: "Failed to verify password." });
+  }
+});
+
+app.post("/s/:id/burn", rateLimit(10, 60 * 1000), async (req, res) => {
+  const id = req.params.id;
+  const referer = req.headers["referer"] || req.headers["origin"] || "";
+  const host = (req.headers["x-forwarded-host"] || req.headers["host"] || "").split(":")[0];
+  if (referer && !referer.includes(host)) return res.status(403).json({ ok: false, error: "Forbidden." });
+  try {
+    const file = await File.findById(id);
+    if (!file) return res.json({ ok: true, alreadyGone: true });
+    await File.deleteById(file.id);
+    await removeFromStorage(file.path);
+    console.log(`[burn] Completed id=${id}`);
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error(`[burn] ERROR for id=${id}:`, error.message);
+    return res.status(500).json({ ok: false, error: "Burn failed." });
+  }
+});
+
+// ── /file/:id — kept for backward compatibility, redirects to /s/:id ──────
+app.get("/file/:id", async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file) return res.status(404).render("not-found");
+    return res.redirect(301, `/s/${req.params.id}`);
   } catch (error) {
     return res.status(400).render("not-found");
   }
@@ -511,14 +623,12 @@ app.post("/file/:id/burn", rateLimit(10, 60 * 1000), async (req, res) => {
       console.log(`[burn] File not found id=${id} — already deleted, treating as success`);
       return res.json({ ok: true, alreadyGone: true });
     }
-    console.log(`[burn] Found file id=${id} path=${file.path} mode=${file.mode}`);
     await File.deleteById(file.id);
-    console.log(`[burn] DB record deleted id=${id}`);
     await removeFromStorage(file.path);
-    console.log(`[burn] Storage deleted path=${file.path}`);
+    console.log(`[burn] Completed id=${id}`);
     return res.json({ ok: true });
   } catch (error) {
-    console.error(`[burn] ERROR for id=${id}:`, error.message, error.stack);
+    console.error(`[burn] ERROR for id=${id}:`, error.message);
     return res.status(500).json({ ok: false, error: "Burn failed." });
   }
 });

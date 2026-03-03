@@ -19,7 +19,7 @@ function mapRow(row) {
 
 async function createFile({ path, originalName, password, mode = "download" }) {
   const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
-  const expiresAt = mode === "view-once" ? new Date(Date.now() + 90000).toISOString() : null;
+  const expiresAt = mode === "view-once" ? new Date(Date.now() + 60000).toISOString() : null;
 
   const { data, error } = await supabase
     .from(filesTable)

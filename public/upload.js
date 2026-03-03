@@ -23,20 +23,17 @@
 
   function showLinkBox(fileId, baseUrl, hasPassword) {
     var shareUrl;
+    var displayUrl = baseUrl + "/s/" + fileId; // always clean for display
 
     if (hasPassword) {
-      shareUrl = baseUrl + "/file/" + fileId;
+      shareUrl = displayUrl;
     } else {
       var linkKey = sessionStorage.getItem("__fse_link_key_" + fileId);
-      if (!linkKey) {
-        shareUrl = baseUrl + "/file/" + fileId;
-      } else {
-        shareUrl = baseUrl + "/file/" + fileId + "#k=" + linkKey;
-      }
+      shareUrl = linkKey ? displayUrl + "#" + linkKey : displayUrl;
     }
 
-    shareLinkEl.href = shareUrl;
-    shareLinkEl.textContent = shareUrl;
+    shareLinkEl.href = shareUrl;          // full URL (with key) for copying
+    shareLinkEl.textContent = displayUrl; // clean URL shown in the box
     linkBoxEl.hidden = false;
   }
 
@@ -203,6 +200,11 @@
       }
 
       var file = fileInput.files[0];
+      var MAX_UPLOAD_BYTES = 1 * 1024 * 1024 * 1024; // 1 GB
+      if (file.size > MAX_UPLOAD_BYTES) {
+        setError("File too large. Maximum upload size is 1 GB.");
+        return;
+      }
       var fileData = await file.arrayBuffer();
       var fileDataBytes = new Uint8Array(fileData);
       var userPassword = passwordInput.value.trim();
@@ -231,42 +233,55 @@
         linkKey = result.linkKey;
       }
 
+      // Step 1 — get a presigned PUT URL from the server
+      setStatus("Preparing secure upload...");
+      var presignRes = await fetch("/api/presign?" + new URLSearchParams({ filename: file.name, filesize: file.size }));
+      if (!presignRes.ok) throw new Error("Could not get upload URL. Please try again.");
+      var presignData = await presignRes.json();
+
+      // Step 2 — encrypt the file (already done above)
+      // Step 3 — PUT encrypted bytes directly to R2 (bypasses Netlify size cap)
+      // No Content-Type header here — keeps this a CORS simple request (no preflight)
       setStatus("Uploading encrypted file...");
-
-      var formData = new FormData();
-      formData.append(
-        "file",
-        new Blob([encryptedPayload], { type: "application/octet-stream" }),
-        file.name
-      );
-      formData.append("originalName", file.name);
-      formData.append("mode", selectedMode);
-      if (userPassword) {
-        var serverToken = await deriveServerToken(userPassword);
-        formData.append("password", serverToken);
+      var putRes;
+      try {
+        putRes = await fetch(presignData.uploadUrl, {
+          method: "PUT",
+          body: new Blob([encryptedPayload]),
+        });
+      } catch (putErr) {
+        throw new Error("Upload blocked (CORS or network). Check R2 CORS policy allows this origin. Detail: " + putErr.message);
       }
+      if (!putRes.ok) throw new Error("Upload to storage failed (HTTP " + putRes.status + "). Please try again.");
 
-      var response = await fetch("/api/upload", {
+      // Step 4 — tell the server to save the metadata
+      setStatus("Finalizing...");
+      var serverToken = userPassword ? await deriveServerToken(userPassword) : null;
+      var commitPayload = {
+        storagePath: presignData.storagePath,
+        originalName: file.name,
+        mode: selectedMode,
+      };
+      if (serverToken) commitPayload.password = serverToken;
+
+      var commitRes = await fetch("/api/commit", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(commitPayload),
       });
 
-      if (!response.ok) {
+      if (!commitRes.ok) {
         var message = "Upload failed. Please try again.";
         try {
-          var errorBody = await response.json();
-          if (errorBody && errorBody.detail) {
-            message = "Error: " + errorBody.detail;
-          } else if (errorBody && errorBody.error) {
-            message = errorBody.error;
-          }
+          var errorBody = await commitRes.json();
+          if (errorBody && errorBody.error) message = errorBody.error;
         } catch (e) {
-          message = "Upload failed (HTTP " + response.status + ")";
+          message = "Upload failed (HTTP " + commitRes.status + ")";
         }
         throw new Error(message);
       }
 
-      var result = await response.json();
+      var result = await commitRes.json();
 
       if (linkKey) {
         sessionStorage.setItem("__fse_link_key_" + result.id, toBase64Url(linkKey));
@@ -287,7 +302,7 @@
 
   async function handleCopyLink(event) {
     event.preventDefault();
-    var linkUrl = shareLinkEl.textContent || shareLinkEl.href;
+    var linkUrl = shareLinkEl.href; // always copy the full URL (includes #key)
 
     try {
       await navigator.clipboard.writeText(linkUrl);
