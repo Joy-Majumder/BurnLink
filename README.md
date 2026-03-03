@@ -17,7 +17,7 @@ BurnLink is an open-source, privacy-first file sharing platform with browser-sid
   - **Password-protected** — Recipient enters a password to decrypt
   - **Link-key** — Decryption key is embedded in the URL fragment (never sent to server)
 - **One-Time Links** — Files are permanently destroyed after the first successful download
-- **View-Once Mode** — File is viewable for 90 seconds, then burned regardless of download
+- **View-Once Mode** — File is viewable for 60 seconds, then burned regardless of download
 - **Brute-Force Protection** — 10-minute lockout after 3 failed password attempts
 - **Up to 1 GB** file size support
 - **Presigned URLs** — Direct client-to-storage transfers via Cloudflare R2
