@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/logo1.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Learn how BurnLink secures your file sharing with end-to-end encryption and one-time download links." />
+  <meta name="description" content="BurnLink secures your files with end-to-end encryption and one-time access links — zero knowledge, zero traces." />
   <meta name="theme-color" content="#0a0a0a" />
   <title>About - BurnLink</title>
   <style>
@@ -18,43 +18,100 @@
     nav { display: flex; gap: 2.5rem; }
     nav a { text-decoration: none; color: #666; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.2s; }
     nav a:hover, nav a.active { color: #fff; }
+
+    /* ── Hero ── */
+    .hero { padding: 7rem 0 5rem; border-bottom: 1px solid #1e1e1e; }
+    .hero-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: #ff8c00; margin-bottom: 1.5rem; }
+    .hero h1 { font-size: 3.8rem; line-height: 1.0; font-weight: 800; letter-spacing: -2.5px; max-width: 700px; margin-bottom: 1.75rem; }
+    .hero h1 span { color: #ff8c00; }
+    .hero-sub { font-size: 1rem; color: #777; line-height: 1.85; max-width: 540px; margin-bottom: 2.5rem; }
+    .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn { display: inline-block; padding: 0.85rem 1.75rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; transition: opacity 0.2s; border-radius: 0; }
+    .btn-primary { background: #ff8c00; color: #000; }
+    .btn-ghost { background: transparent; color: #aaa; border: 1px solid #333; }
+    .btn:hover { opacity: 0.8; }
+
+    /* ── Section chrome ── */
+    section { padding: 5rem 0; border-bottom: 1px solid #1e1e1e; }
+    .section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #555; margin-bottom: 1rem; }
+    .section-title { font-size: 2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 1rem; }
+    .section-sub { font-size: 0.9rem; color: #666; line-height: 1.8; max-width: 500px; margin-bottom: 3rem; }
+
+    /* ── Steps ── */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #1e1e1e; border: 1px solid #1e1e1e; }
+    .step { background: #0a0a0a; padding: 2rem 1.5rem; position: relative; }
+    .step-num { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #333; text-transform: uppercase; margin-bottom: 1.25rem; }
+    .step-icon { font-size: 1.5rem; margin-bottom: 1rem; line-height: 1; }
+    .step strong { display: block; font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.6rem; letter-spacing: 0.02em; }
+    .step p { font-size: 0.82rem; color: #666; line-height: 1.7; }
+    .step::after { content: ""; position: absolute; top: 50%; right: -1px; transform: translateY(-50%); width: 1px; height: 40%; background: #ff8c00; opacity: 0.35; }
+    .step:last-child::after { display: none; }
+
+    /* ── Feature cards ── */
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #1e1e1e; border: 1px solid #1e1e1e; }
+    .feature { background: #0a0a0a; padding: 2rem; }
+    .feature-tag { display: inline-block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; background: #ff8c0015; color: #ff8c00; border: 1px solid #ff8c0030; padding: 0.2rem 0.6rem; margin-bottom: 1rem; }
+    .feature strong { display: block; font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 0.6rem; }
+    .feature p { font-size: 0.82rem; color: #666; line-height: 1.75; }
+
+    /* ── Tech breakdown ── */
+    .tech-row { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+    .tech-list { list-style: none; }
+    .tech-list li { padding: 1rem 0; border-bottom: 1px solid #1a1a1a; display: flex; gap: 1rem; align-items: flex-start; font-size: 0.875rem; color: #888; line-height: 1.65; }
+    .tech-list li .dot { flex-shrink: 0; width: 5px; height: 5px; background: #ff8c00; border-radius: 50%; margin-top: 0.5rem; }
+    .tech-note { border: 1px solid #1e1e1e; padding: 1.75rem; background: #050505; }
+    .tech-note h4 { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #ff8c00; margin-bottom: 1rem; }
+    .tech-note p { font-size: 0.82rem; color: #666; line-height: 1.8; }
+    .tech-note p + p { margin-top: 0.75rem; }
+
+    /* ── Principles ── */
+    .principles { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .principle { border: 1px solid #1e1e1e; padding: 1.75rem; }
+    .principle-num { font-size: 2rem; font-weight: 800; color: #1e1e1e; letter-spacing: -1px; margin-bottom: 0.75rem; line-height: 1; }
+    .principle strong { display: block; font-size: 0.85rem; font-weight: 700; color: #ddd; margin-bottom: 0.5rem; }
+    .principle p { font-size: 0.82rem; color: #666; line-height: 1.75; }
+
+    /* ── Stats strip ── */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid #1e1e1e; }
+    .stat { padding: 2rem; text-align: center; border-right: 1px solid #1e1e1e; }
+    .stat:last-child { border-right: none; }
+    .stat-val { font-size: 2rem; font-weight: 800; letter-spacing: -1px; color: #ff8c00; margin-bottom: 0.35rem; }
+    .stat-label { font-size: 0.72rem; color: #555; letter-spacing: 0.08em; text-transform: uppercase; }
+
+    /* ── Footer ── */
     footer { border-top: 1px solid #1e1e1e; padding: 3rem 0; }
     .footer-content { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 2rem; }
     .footer-section h3 { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin-bottom: 1rem; color: #555; }
     .footer-section a { display: block; color: #777; text-decoration: none; font-size: 0.85rem; margin-bottom: 0.5rem; transition: color 0.2s; }
     .footer-section a:hover { color: #fff; }
     .footer-bottom { border-top: 1px solid #1e1e1e; padding-top: 1.5rem; color: #444; font-size: 0.78rem; }
-    main { padding: 6rem 0 4rem; min-height: calc(100vh - 140px); }
-    .about-content { max-width: 700px; }
-    h1 { font-size: 3rem; line-height: 1.05; font-weight: 800; letter-spacing: -2px; color: #fff; margin-bottom: 1.5rem; }
-    .intro { font-size: 0.95rem; color: #888; line-height: 1.8; margin-bottom: 3rem; }
-    h2 { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-top: 3rem; margin-bottom: 1.25rem; }
-    .plain-list { list-style: none; border-top: 1px solid #1e1e1e; }
-    .plain-list li { padding: 0.85rem 0; font-size: 0.9rem; color: #aaa; border-bottom: 1px solid #1e1e1e; display: flex; gap: 0.75rem; align-items: flex-start; }
-    .plain-list li::before { content: ""; display: inline-block; width: 4px; height: 4px; background: #ff8c00; border-radius: 50%; flex-shrink: 0; margin-top: 0.55rem; }
-    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #1e1e1e; border: 1px solid #1e1e1e; margin: 2.5rem 0; }
-    .feature-item { background: #0a0a0a; padding: 1.75rem; }
-    .feature-item strong { display: block; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; color: #fff; margin-bottom: 0.5rem; }
-    .feature-item p { font-size: 0.875rem; color: #777; line-height: 1.7; }
-    .cta-row { display: flex; gap: 1.5rem; margin-top: 3rem; flex-wrap: wrap; }
-    .btn { display: inline-block; padding: 0.8rem 1.5rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; transition: opacity 0.2s; }
-    .btn-primary { background: #ff8c00; color: #000; }
-    .btn-ghost { background: transparent; color: #aaa; border: 1px solid #333; }
-    .btn:hover { opacity: 0.8; }
+
+    @media (max-width: 900px) {
+      .steps { grid-template-columns: 1fr 1fr; }
+      .step::after { display: none; }
+      .features { grid-template-columns: 1fr 1fr; }
+      .tech-row { grid-template-columns: 1fr; }
+      .principles { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .stat { border-bottom: 1px solid #1e1e1e; }
+    }
     @media (max-width: 768px) {
       nav { gap: 1.5rem; }
       .header-content { flex-wrap: wrap; gap: 1rem; }
       .footer-content { grid-template-columns: 1fr; gap: 1.5rem; }
-      main { padding: 3rem 0 2rem; }
-      h1 { font-size: 2.25rem; letter-spacing: -1px; }
-      .feature-grid { grid-template-columns: 1fr; }
-      .cta-row { flex-direction: column; }
+      .hero { padding: 4.5rem 0 3.5rem; }
+      .hero h1 { font-size: 2.6rem; letter-spacing: -1.5px; }
+      section { padding: 3.5rem 0; }
+      .section-title { font-size: 1.6rem; }
     }
     @media (max-width: 480px) {
       .container { padding: 0 1rem; }
       .logo img { height: 38px; }
-      h1 { font-size: 1.75rem; letter-spacing: -0.5px; }
-      .intro { font-size: 0.88rem; }
+      .hero h1 { font-size: 2rem; letter-spacing: -1px; }
+      .steps { grid-template-columns: 1fr; }
+      .features { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .hero-cta { flex-direction: column; }
     }
   </style>
   <script defer src="https://cloud.umami.is/script.js" data-website-id="5557b587-f2e2-4eb6-8edd-582164ff68da" nonce="<%= cspNonce %>"></script>
@@ -64,60 +121,205 @@
     <div class="container">
       <div class="header-content">
         <a href="/" class="logo"><img src="/logo1.png" alt="BurnLink" /></a>
-        <nav><a href="/">Home</a><a href="/about" class="active">About</a></nav>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/about" class="active">About</a>
+        </nav>
       </div>
     </div>
   </header>
 
-  <main>
+  <!-- ── Hero ────────────────────────────────────────────────── -->
+  <div class="hero">
     <div class="container">
-      <div class="about-content">
-        <h1>About BurnLink</h1>
-        <p class="intro">BurnLink is a zero-knowledge file sharing service. Files are encrypted in your browser before they leave your device. We store only the encrypted payload and have no ability to read your data.</p>
+      <p class="hero-label">What is BurnLink</p>
+      <h1>Share files that <span>self-destruct.</span></h1>
+      <p class="hero-sub">BurnLink is a zero-knowledge file sharing tool. Your files are encrypted entirely in your browser before leaving your device. We store only the encrypted payload — and delete it the moment it's accessed.</p>
+      <div class="hero-cta">
+        <a href="/" class="btn btn-primary">Share a file now</a>
+        <a href="/security-policy" class="btn btn-ghost">Security policy</a>
+      </div>
+    </div>
+  </div>
 
-        <h2>How it works</h2>
-        <ul class="plain-list">
-          <li>Your file is encrypted in-browser using AES-256-GCM before upload</li>
-          <li>The server stores only the encrypted payload, never unencrypted data</li>
-          <li>Sharing links are invalidated after the first download</li>
-          <li>Optional password protection with 10-minute lockout after 3 failed attempts</li>
-          <li>Zero-knowledge architecture — we cannot access your files</li>
-        </ul>
-
-        <div class="feature-grid">
-          <div class="feature-item">
-            <strong>Privacy first</strong>
-            <p>Your files are encrypted in your browser. We never see the unencrypted content.</p>
-          </div>
-          <div class="feature-item">
-            <strong>One-time access</strong>
-            <p>Files are deleted immediately after the first download.</p>
-          </div>
-          <div class="feature-item">
-            <strong>Optional passwords</strong>
-            <p>Add password protection for an extra layer of security.</p>
-          </div>
-          <div class="feature-item">
-            <strong>Open source</strong>
-            <p>Transparent code, transparent choices. Auditable by anyone.</p>
-          </div>
+  <!-- ── How it works ─────────────────────────────────────────── -->
+  <section>
+    <div class="container">
+      <p class="section-label">How it works</p>
+      <h2 class="section-title">Four steps, zero exposure</h2>
+      <p class="section-sub">The entire encryption and decryption process runs locally in your browser. The server never touches your plaintext data.</p>
+      <div class="steps">
+        <div class="step">
+          <p class="step-num">Step 01</p>
+          <div class="step-icon">🔒</div>
+          <strong>Encrypt in-browser</strong>
+          <p>Your file is encrypted in your browser with AES-256-GCM before a single byte leaves your device.</p>
         </div>
-
-        <h2>Why BurnLink?</h2>
-        <ul class="plain-list">
-          <li>Traditional cloud storage keeps files indefinitely</li>
-          <li>Email attachments are exposed through message systems</li>
-          <li>Most sharing services can read your data</li>
-          <li>BurnLink gives you control and privacy</li>
-        </ul>
-
-        <div class="cta-row">
-          <a href="/" class="btn btn-primary">Share a file</a>
-          <a href="https://github.com/Joy-Majumder/BurnLink" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">View on GitHub</a>
+        <div class="step">
+          <p class="step-num">Step 02</p>
+          <div class="step-icon">☁️</div>
+          <strong>Upload ciphertext only</strong>
+          <p>Only the encrypted payload is uploaded. The decryption key never reaches our servers.</p>
+        </div>
+        <div class="step">
+          <p class="step-num">Step 03</p>
+          <div class="step-icon">🔗</div>
+          <strong>Share the link</strong>
+          <p>You receive a one-time link. The decryption key travels only in the URL fragment — invisible to servers and logs.</p>
+        </div>
+        <div class="step">
+          <p class="step-num">Step 04</p>
+          <div class="step-icon">💥</div>
+          <strong>Auto-destruct</strong>
+          <p>The encrypted file is permanently deleted the moment the recipient accesses it. The link is dead forever.</p>
         </div>
       </div>
     </div>
-  </main>
+  </section>
+
+  <!-- ── Features ─────────────────────────────────────────────── -->
+  <section>
+    <div class="container">
+      <p class="section-label">Features</p>
+      <h2 class="section-title">Built for security</h2>
+      <p class="section-sub">Every feature exists to protect your privacy, not compromise it.</p>
+      <div class="features">
+        <div class="feature">
+          <span class="feature-tag">Encryption</span>
+          <strong>AES-256-GCM</strong>
+          <p>Industry-standard authenticated encryption. Files are encrypted in your browser using the Web Crypto API — no third-party libraries involved.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-tag">Access</span>
+          <strong>One-time links</strong>
+          <p>Each link is invalidated after a single access. Subsequent visits return a permanent 410 Gone — the file simply no longer exists.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-tag">Modes</span>
+          <strong>Download &amp; View-once</strong>
+          <p>Download mode saves the file to your device. View-once mode renders it in a protected in-browser viewer and destroys it when closed.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-tag">Auth</span>
+          <strong>Password protection</strong>
+          <p>Add an optional password. Wrong guesses trigger a 10-minute lockout after 3 attempts. The raw password never leaves your browser.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-tag">Privacy</span>
+          <strong>Zero knowledge</strong>
+          <p>The decryption key is embedded in the URL fragment. Fragments are never sent to servers, never logged, never seen by us.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-tag">Limits</span>
+          <strong>Up to 1 GB</strong>
+          <p>Share files up to 1 GB. Large files upload directly to encrypted cloud storage, bypassing any serverless size cap.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Technical detail ──────────────────────────────────────── -->
+  <section>
+    <div class="container">
+      <p class="section-label">Technical detail</p>
+      <h2 class="section-title">What actually happens</h2>
+      <div class="tech-row">
+        <ul class="tech-list">
+          <li>
+            <span class="dot"></span>
+            <span>Files are encrypted using <strong>AES-256-GCM</strong> via the browser's native Web Crypto API. A random 96-bit IV is generated per file.</span>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <span>For link-key mode, a 256-bit random key is generated in-browser. The key is encoded as a URL fragment so it never reaches any server.</span>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <span>For password mode, a key is derived using <strong>PBKDF2-SHA256 with 210,000 iterations</strong> and a random 128-bit salt stored in the envelope.</span>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <span>Encrypted data is stored with a custom binary envelope header that the server validates before accepting any upload.</span>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <span>Database records are deleted <strong>atomically before</strong> the file is served, preventing race conditions on concurrent download attempts.</span>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <span>Storage objects are deleted immediately after successful download. No retention, no archiving, no backups of your content.</span>
+          </li>
+        </ul>
+        <div>
+          <div class="tech-note">
+            <h4>Why the URL fragment?</h4>
+            <p>HTTP specifications define the URL fragment (<code>#…</code>) as client-side only. Browsers never include it in requests to servers. This means the decryption key in your BurnLink URL is structurally invisible to our servers, CDNs, and access logs — by protocol design, not by policy.</p>
+            <p>Even if our entire infrastructure were compromised, an attacker cannot recover your plaintext without the key, which exists only in the URL you shared.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Principles ────────────────────────────────────────────── -->
+  <section>
+    <div class="container">
+      <p class="section-label">Principles</p>
+      <h2 class="section-title">Why we built it this way</h2>
+      <p class="section-sub">These aren't marketing claims — they're constraints that shaped every technical decision.</p>
+      <div class="principles">
+        <div class="principle">
+          <div class="principle-num">01</div>
+          <strong>Encryption is not optional</strong>
+          <p>Data is always encrypted before upload. There is no "unencrypted mode", no admin override, no backdoor. If you lose your link key, the file is unrecoverable — by anyone, including us.</p>
+        </div>
+        <div class="principle">
+          <div class="principle-num">02</div>
+          <strong>One access, then gone</strong>
+          <p>The database record is deleted atomically before the file is delivered. Subsequent requests return 410 Gone. There is no concept of multiple downloads per link.</p>
+        </div>
+        <div class="principle">
+          <div class="principle-num">03</div>
+          <strong>Minimal footprint</strong>
+          <p>We store exactly what we need: the encrypted payload and a salted hash of your server auth token (not your password). No analytics on file content, no IP logging tied to files.</p>
+        </div>
+        <div class="principle">
+          <div class="principle-num">04</div>
+          <strong>Security by design</strong>
+          <p>Rate limiting, brute-force lockouts, strict security headers, and input validation aren't features — they're baselines. Responsible disclosure is always welcome via our security policy.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stats ─────────────────────────────────────────────────── -->
+  <section style="border-bottom: none; padding-bottom: 2rem;">
+    <div class="container">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-val">256</div>
+          <div class="stat-label">AES key bits</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">210k</div>
+          <div class="stat-label">PBKDF2 iterations</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">1 GB</div>
+          <div class="stat-label">Max file size</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">0</div>
+          <div class="stat-label">Files retained after access</div>
+        </div>
+      </div>
+      <div style="margin-top: 3rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="/" class="btn btn-primary">Share a file</a>
+        <a href="/security-policy" class="btn btn-ghost">Security policy</a>
+        <a href="/hall-of-fame" class="btn btn-ghost">Hall of fame</a>
+      </div>
+    </div>
+  </section>
 
   <footer>
     <div class="container">
