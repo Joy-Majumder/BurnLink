@@ -21,6 +21,7 @@ const hasAppUploadLimit =
 const PASSWORD_MAX_ATTEMPTS = 3;
 const PASSWORD_LOCK_MINUTES = 10;
 const enforceCanonicalRedirect = process.env.ENFORCE_CANONICAL_REDIRECT === "true";
+const TURNSTILE_SITE_KEY = process.env.TURNSTILE_SITE_KEY || "";
 const r2CspOrigin = process.env.R2_ACCOUNT_ID
   ? `https://*.r2.cloudflarestorage.com`
   : null;
@@ -28,6 +29,34 @@ const r2CspOrigin = process.env.R2_ACCOUNT_ID
 // Secret used to sign one-time R2 cleanup tokens.
 // Falls back to the R2 secret key so no extra env var is required.
 const CLEANUP_SECRET = process.env.CLEANUP_TOKEN_SECRET || process.env.R2_SECRET_ACCESS_KEY || "burnlink-cleanup-v1";
+const GATEWAY_SECRET = process.env.GATEWAY_COOKIE_SECRET || CLEANUP_SECRET;
+const GATEWAY_COOKIE = "_bl_gw";
+const GATEWAY_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+function signGatewayCookie() {
+  const ts = Date.now().toString();
+  const sig = crypto.createHmac("sha256", GATEWAY_SECRET).update(ts).digest("hex");
+  return `${ts}.${sig}`;
+}
+
+function isGatewayCookieValid(value) {
+  if (!value || typeof value !== "string") return false;
+  const dot = value.lastIndexOf(".");
+  if (dot === -1) return false;
+  const ts = value.slice(0, dot);
+  const sig = value.slice(dot + 1);
+  let expected;
+  try {
+    expected = crypto.createHmac("sha256", GATEWAY_SECRET).update(ts).digest("hex");
+    if (sig.length !== expected.length) return false;
+    if (!crypto.timingSafeEqual(Buffer.from(sig, "hex"), Buffer.from(expected, "hex"))) return false;
+  } catch {
+    return false;
+  }
+  const age = Date.now() - Number(ts);
+  return age >= 0 && age < GATEWAY_TTL_MS;
+}
+
 function makeCleanupToken(storagePath) {
   return crypto.createHmac("sha256", CLEANUP_SECRET).update(storagePath).digest("hex");
 }
@@ -179,6 +208,7 @@ app.use((req, res, next) => {
   const nonce = crypto.randomBytes(16).toString("base64");
   res.locals.cspNonce = nonce;
 
+  res.locals.turnstileSiteKey = TURNSTILE_SITE_KEY;
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -282,6 +312,57 @@ app.use((req, res, next) => {
   }
 
   return res.redirect(301, `${canonicalUrl.origin}${req.originalUrl}`);
+});
+
+// ── Turnstile gateway — verify humans before accessing any page ────────────
+app.use((req, res, next) => {
+  // Exempt: gateway page, verify endpoint, health, well-known, static assets
+  const exempt = ["/gateway", "/api/gateway-verify", "/health", "/.well-known"];
+  if (exempt.some(p => req.path === p || req.path.startsWith(p + "/"))) return next();
+  if (/\.\w{1,6}$/.test(req.path)) return next(); // static files
+
+  const raw = req.headers.cookie || "";
+  const cookieEntry = raw.split(";").map(s => s.trim()).find(s => s.startsWith(GATEWAY_COOKIE + "="));
+  const cookieVal = cookieEntry ? cookieEntry.slice(GATEWAY_COOKIE.length + 1) : null;
+
+  if (isGatewayCookieValid(cookieVal)) return next();
+
+  // Validate and sanitize next param to prevent open redirect
+  const next_ = encodeURIComponent(req.originalUrl.startsWith("/") ? req.originalUrl : "/");
+  return res.redirect(`/gateway?next=${next_}`);
+});
+
+app.get("/gateway", (req, res) => {
+  const next_ = (req.query.next || "/").toString();
+  // Only allow relative paths
+  const returnTo = next_.startsWith("/") && !next_.startsWith("//") ? next_ : "/";
+  res.render("gateway", { returnTo, cspNonce: res.locals.cspNonce, turnstileSiteKey: res.locals.turnstileSiteKey });
+});
+
+app.post("/api/gateway-verify", async (req, res) => {
+  const token = req.body["cf-turnstile-response"];
+  const fwdRaw = (req.headers["x-forwarded-for"] || "").trim();
+  const userIp = fwdRaw.split(",")[0].trim() || req.socket?.remoteAddress;
+
+  const ok = await verifyTurnstile(token, userIp);
+  if (!ok) {
+    return res.status(403).json({ error: "Verification failed. Please try again." });
+  }
+
+  const cookieVal = signGatewayCookie();
+  const isSecure = req.secure || req.headers["x-forwarded-proto"] === "https";
+  res.setHeader("Set-Cookie", [
+    `${GATEWAY_COOKIE}=${cookieVal}`,
+    "HttpOnly",
+    isSecure ? "Secure" : "",
+    "SameSite=Lax",
+    `Max-Age=${GATEWAY_TTL_MS / 1000}`,
+    "Path=/",
+  ].filter(Boolean).join("; "));
+
+  const returnTo = (req.body.returnTo || "/").toString();
+  const safeReturn = returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : "/";
+  return res.json({ ok: true, redirect: safeReturn });
 });
 
 app.get("/", (req, res) => {
