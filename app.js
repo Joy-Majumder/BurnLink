@@ -175,6 +175,33 @@ function isLocalHost(hostname) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
 }
 
+// ── Bot scanner fast-reject ────────────────────────────────────────────────
+// Drop known exploit/WordPress/scanner probes before any other logic runs.
+const BOT_SCAN_EXACT = new Set([
+  "/wp-login.php", "/wp-login", "/xmlrpc.php", "/admin", "/administrator",
+  "/getcmd", "/console", "/manager",
+  "/.well-known/traffic-advice",
+  "/wp-includes/wlwmanifest.xml",
+]);
+const BOT_SCAN_SUFFIX = [
+  "/wp-includes/wlwmanifest.xml",
+  "/wp-admin", "/wp-login.php", "/xmlrpc.php",
+];
+const BOT_SCAN_PREFIX = [
+  "/php", "/cgi-bin", "/boaform", "/GponForm", "/owa/",
+];
+app.use((req, res, next) => {
+  const p = req.path.toLowerCase();
+  if (
+    BOT_SCAN_EXACT.has(p) ||
+    BOT_SCAN_SUFFIX.some(s => p.endsWith(s)) ||
+    BOT_SCAN_PREFIX.some(s => p.startsWith(s))
+  ) {
+    return res.status(404).end();
+  }
+  next();
+});
+
 // Strict body size limits — prevent oversized request attacks
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.json({ limit: "16kb" }));
