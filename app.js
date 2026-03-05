@@ -32,6 +32,23 @@ function makeCleanupToken(storagePath) {
   return crypto.createHmac("sha256", CLEANUP_SECRET).update(storagePath).digest("hex");
 }
 
+async function verifyTurnstile(token, remoteip) {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return true; // skip if env var not configured
+  if (!token) return false;
+  try {
+    const resp = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ secret, response: token, remoteip }),
+    });
+    const data = await resp.json();
+    return data.success === true;
+  } catch {
+    return false;
+  }
+}
+
 let canonicalUrl = null;
 try {
   canonicalUrl = new URL(canonicalBaseUrl);
@@ -169,13 +186,13 @@ app.use((req, res, next) => {
   res.setHeader("X-XSS-Protection", "0"); // disabled — CSP is the correct defence
   res.setHeader("Content-Security-Policy", [
     "default-src 'none'",
-    `script-src 'self' 'nonce-${nonce}' https://cloud.umami.is`,
+    `script-src 'self' 'nonce-${nonce}' https://cloud.umami.is https://challenges.cloudflare.com`,
     "style-src 'unsafe-inline'",
     "img-src 'self' blob: data: https://api.producthunt.com",
     "media-src 'self' blob:",
     "font-src 'self'",
-    `connect-src 'self' https://cloud.umami.is${r2CspOrigin ? " " + r2CspOrigin : ""}`,
-    "frame-src blob:",
+    `connect-src 'self' https://cloud.umami.is https://challenges.cloudflare.com${r2CspOrigin ? " " + r2CspOrigin : ""}`,
+    "frame-src blob: https://challenges.cloudflare.com",
     "form-action 'self'",
     "base-uri 'self'",
     "object-src 'none'",
@@ -343,7 +360,14 @@ app.get("/api/presign", rateLimit(30, 10 * 60 * 1000), async (req, res) => {
 
 // Step 2 — browser calls this after it finishes the direct PUT to R2
 app.post("/api/commit", rateLimit(30, 10 * 60 * 1000), async (req, res) => {
-  const { storagePath, originalName, mode: rawMode, password: rawPassword } = req.body;
+  const { storagePath, originalName, mode: rawMode, password: rawPassword, "cf-turnstile-response": turnstileToken } = req.body;
+
+  const fwdRaw = (req.headers["x-forwarded-for"] || "").trim();
+  const userIp = fwdRaw.split(",")[0].trim() || req.socket?.remoteAddress;
+  const turnstileOk = await verifyTurnstile(turnstileToken, userIp);
+  if (!turnstileOk) {
+    return res.status(403).json({ error: "Bot verification failed. Please try again." });
+  }
 
   if (!storagePath || !STORAGE_PATH_RE.test(storagePath)) {
     return res.status(400).json({ error: "Invalid storage path." });

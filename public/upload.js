@@ -257,10 +257,12 @@
       // Step 4 — tell the server to save the metadata
       setStatus("Finalizing...");
       var serverToken = userPassword ? await deriveServerToken(userPassword) : null;
+      var turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
       var commitPayload = {
         storagePath: presignData.storagePath,
         originalName: file.name,
         mode: selectedMode,
+        "cf-turnstile-response": turnstileInput ? turnstileInput.value : "",
       };
       if (serverToken) commitPayload.password = serverToken;
 

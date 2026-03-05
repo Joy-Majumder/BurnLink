@@ -116,6 +116,7 @@
     }
   </style>
   <script defer src="https://cloud.umami.is/script.js" data-website-id="5557b587-f2e2-4eb6-8edd-582164ff68da" nonce="<%= cspNonce %>"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
   <header>
@@ -176,6 +177,7 @@
                 </label>
               </div>
             </div>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAACmsuf1sbRQzW0dW" data-theme="dark"></div>
             <button id="upload-btn" type="submit">Encrypt &amp; Upload</button>
             <span id="upload-status" class="status" aria-live="polite"></span>
           </form>
