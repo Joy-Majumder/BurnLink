@@ -1,326 +1,818 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/logo1.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="BurnLink Hall of Fame — security researchers who responsibly disclosed vulnerabilities and helped make BurnLink safer." />
-  <meta name="theme-color" content="#0a0a0a" />
-  <meta property="og:title" content="Hall of Fame — BurnLink" />
-  <meta property="og:description" content="Security researchers who responsibly disclosed vulnerabilities in BurnLink's encrypted file-sharing platform." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://burnlink.page/hall-of-fame" />
-  <title>Hall of Fame — BurnLink</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0a0a0a; color: #fff; line-height: 1.6; overflow-x: hidden; min-height: 100vh; }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
-    header { padding: 1.75rem 0; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; background: #0a0a0a; z-index: 100; }
-    .header-content { display: flex; justify-content: space-between; align-items: center; }
-    .logo { text-decoration: none; display: flex; align-items: center; }
-    .logo img { height: 45px; width: auto; display: block; }
-    nav { display: flex; gap: 2.5rem; }
-    nav a { text-decoration: none; color: #666; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.2s; }
-    nav a:hover { color: #fff; }
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo1.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="BurnLink Hall of Fame — security researchers who responsibly disclosed vulnerabilities and helped make BurnLink safer."
+    />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta property="og:title" content="Hall of Fame — BurnLink" />
+    <meta
+      property="og:description"
+      content="Security researchers who responsibly disclosed vulnerabilities in BurnLink's encrypted file-sharing platform."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://burnlink.page/hall-of-fame" />
+    <title>Hall of Fame — BurnLink</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background: #0a0a0a;
+        color: #fff;
+        line-height: 1.6;
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+      header {
+        padding: 1.75rem 0;
+        border-bottom: 1px solid #1e1e1e;
+        position: sticky;
+        top: 0;
+        background: #0a0a0a;
+        z-index: 100;
+      }
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .logo {
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+      }
+      .logo img {
+        height: 45px;
+        width: auto;
+        display: block;
+      }
+      nav {
+        display: flex;
+        gap: 2.5rem;
+      }
+      nav a {
+        text-decoration: none;
+        color: #666;
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        transition: color 0.2s;
+      }
+      nav a:hover {
+        color: #fff;
+      }
 
-    main { padding: 6rem 0 5rem; min-height: calc(100vh - 140px); }
-    .page-content { max-width: 820px; }
+      main {
+        padding: 6rem 0 5rem;
+        min-height: calc(100vh - 140px);
+      }
+      .page-content {
+        max-width: 820px;
+      }
 
-    h1 { font-size: 2.75rem; line-height: 1.05; font-weight: 800; letter-spacing: -2px; color: #fff; margin-bottom: 0.6rem; }
-    .page-meta { font-size: 0.75rem; color: #444; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2.5rem; }
-    .page-meta span { color: #666; }
-    .intro { font-size: 0.95rem; color: #888; line-height: 1.8; margin-bottom: 3rem; padding-bottom: 3rem; border-bottom: 1px solid #1e1e1e; }
+      h1 {
+        font-size: 2.75rem;
+        line-height: 1.05;
+        font-weight: 800;
+        letter-spacing: -2px;
+        color: #fff;
+        margin-bottom: 0.6rem;
+      }
+      .page-meta {
+        font-size: 0.75rem;
+        color: #444;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 2.5rem;
+      }
+      .page-meta span {
+        color: #666;
+      }
+      .intro {
+        font-size: 0.95rem;
+        color: #888;
+        line-height: 1.8;
+        margin-bottom: 3rem;
+        padding-bottom: 3rem;
+        border-bottom: 1px solid #1e1e1e;
+      }
 
-    /* Stats bar */
-    .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #1a1a1a; border: 1px solid #1a1a1a; margin-bottom: 3rem; }
-    .stat-item { background: #0a0a0a; padding: 1.25rem 1.5rem; }
-    .stat-value { font-size: 2rem; font-weight: 800; color: #fff; letter-spacing: -1px; }
-    .stat-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #555; margin-top: 0.2rem; }
+      /* Stats bar */
+      .stats-bar {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        background: #1a1a1a;
+        border: 1px solid #1a1a1a;
+        margin-bottom: 3rem;
+      }
+      .stat-item {
+        background: #0a0a0a;
+        padding: 1.25rem 1.5rem;
+      }
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -1px;
+      }
+      .stat-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #555;
+        margin-top: 0.2rem;
+      }
 
-    /* Section headings */
-    h2 { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #ff8c00; margin-bottom: 1.25rem; margin-top: 3rem; }
-    h2:first-of-type { margin-top: 0; }
+      /* Section headings */
+      h2 {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #eb583d;
+        margin-bottom: 1.25rem;
+        margin-top: 3rem;
+      }
+      h2:first-of-type {
+        margin-top: 0;
+      }
 
-    /* Hall of fame cards */
-    .hof-empty { border: 1px solid #1a1a1a; padding: 3rem 2rem; text-align: center; }
-    .hof-empty .trophy { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.3; }
-    .hof-empty p { font-size: 0.88rem; color: #444; line-height: 1.8; }
-    .hof-empty a { color: #ff8c00; text-decoration: none; }
-    .hof-empty a:hover { text-decoration: underline; }
+      /* Hall of fame cards */
+      .hof-empty {
+        border: 1px solid #1a1a1a;
+        padding: 3rem 2rem;
+        text-align: center;
+      }
+      .hof-empty .trophy {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+      }
+      .hof-empty p {
+        font-size: 0.88rem;
+        color: #444;
+        line-height: 1.8;
+      }
+      .hof-empty a {
+        color: #eb583d;
+        text-decoration: none;
+      }
+      .hof-empty a:hover {
+        text-decoration: underline;
+      }
 
-    /* Severity badges */
-    .sev { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.55rem; border-radius: 2px; display: inline-block; }
-    .sev.critical { background: rgba(255,68,68,0.12); color: #ff4444; border: 1px solid rgba(255,68,68,0.25); }
-    .sev.high     { background: rgba(255,140,0,0.12);  color: #ff8c00; border: 1px solid rgba(255,140,0,0.25); }
-    .sev.medium   { background: rgba(255,215,0,0.08);  color: #ffd700; border: 1px solid rgba(255,215,0,0.2); }
-    .sev.low      { background: rgba(150,150,150,0.08); color: #888;    border: 1px solid rgba(150,150,150,0.2); }
+      /* Severity badges */
+      .sev {
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.55rem;
+        border-radius: 2px;
+        display: inline-block;
+      }
+      .sev.critical {
+        background: rgba(255, 68, 68, 0.12);
+        color: #ff4444;
+        border: 1px solid rgba(255, 68, 68, 0.25);
+      }
+      .sev.high {
+        background: rgba(235, 88, 61, 0.12);
+        color: #eb583d;
+        border: 1px solid rgba(235, 88, 61, 0.25);
+      }
+      .sev.medium {
+        background: rgba(255, 215, 0, 0.08);
+        color: #ffd700;
+        border: 1px solid rgba(255, 215, 0, 0.2);
+      }
+      .sev.low {
+        background: rgba(150, 150, 150, 0.08);
+        color: #888;
+        border: 1px solid rgba(150, 150, 150, 0.2);
+      }
 
-    /* Findings log */
-    .findings-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
-    .findings-table th { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #555; text-align: left; padding: 0.6rem 0.9rem; border-bottom: 1px solid #1e1e1e; }
-    .findings-table td { font-size: 0.845rem; color: #999; padding: 0.9rem 0.9rem; border-bottom: 1px solid #0f0f0f; vertical-align: middle; line-height: 1.5; }
-    .findings-table tr:last-child td { border-bottom: none; }
-    .finding-id { font-family: "Monaco", "Courier New", monospace; font-size: 0.75rem; color: #555; }
-    .status-badge { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.55rem; display: inline-block; }
-    .status-badge.fixed    { background: rgba(0,200,80,0.1);  color: #00c850; border: 1px solid rgba(0,200,80,0.2); }
-    .status-badge.wontfix  { background: rgba(150,150,150,0.08); color: #666; border: 1px solid rgba(150,150,150,0.2); }
-    .status-badge.invalid  { background: rgba(150,150,150,0.08); color: #555; border: 1px solid rgba(150,150,150,0.15); }
-    .status-badge.design   { background: rgba(100,149,237,0.08); color: #6495ed; border: 1px solid rgba(100,149,237,0.2); }
-    .status-badge.open     { background: rgba(255,68,68,0.1);  color: #ff6666; border: 1px solid rgba(255,68,68,0.2); }
-    .finding-title { color: #ccc; font-weight: 500; }
-    .finding-note { display: block; font-size: 0.78rem; color: #555; margin-top: 0.2rem; font-style: italic; }
+      /* Findings log */
+      .findings-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.5rem;
+      }
+      .findings-table th {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #555;
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+        border-bottom: 1px solid #1e1e1e;
+      }
+      .findings-table td {
+        font-size: 0.845rem;
+        color: #999;
+        padding: 0.9rem 0.9rem;
+        border-bottom: 1px solid #0f0f0f;
+        vertical-align: middle;
+        line-height: 1.5;
+      }
+      .findings-table tr:last-child td {
+        border-bottom: none;
+      }
+      .finding-id {
+        font-family: "Monaco", "Courier New", monospace;
+        font-size: 0.75rem;
+        color: #555;
+      }
+      .status-badge {
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.55rem;
+        display: inline-block;
+      }
+      .status-badge.fixed {
+        background: rgba(0, 200, 80, 0.1);
+        color: #00c850;
+        border: 1px solid rgba(0, 200, 80, 0.2);
+      }
+      .status-badge.wontfix {
+        background: rgba(150, 150, 150, 0.08);
+        color: #666;
+        border: 1px solid rgba(150, 150, 150, 0.2);
+      }
+      .status-badge.invalid {
+        background: rgba(150, 150, 150, 0.08);
+        color: #555;
+        border: 1px solid rgba(150, 150, 150, 0.15);
+      }
+      .status-badge.design {
+        background: rgba(100, 149, 237, 0.08);
+        color: #6495ed;
+        border: 1px solid rgba(100, 149, 237, 0.2);
+      }
+      .status-badge.open {
+        background: rgba(255, 68, 68, 0.1);
+        color: #ff6666;
+        border: 1px solid rgba(255, 68, 68, 0.2);
+      }
+      .finding-title {
+        color: #ccc;
+        font-weight: 500;
+      }
+      .finding-note {
+        display: block;
+        font-size: 0.78rem;
+        color: #555;
+        margin-top: 0.2rem;
+        font-style: italic;
+      }
 
-    /* Recognition tiers */
-    .recog-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #1a1a1a; border: 1px solid #1a1a1a; margin-bottom: 1.5rem; }
-    .recog-item { background: #0a0a0a; padding: 1.25rem; }
-    .recog-item .level { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
-    .recog-item .level.critical { color: #ff4444; }
-    .recog-item .level.high     { color: #ff8c00; }
-    .recog-item .level.medium   { color: #ffd700; }
-    .recog-item .level.low      { color: #888; }
-    .recog-item .recog-label { font-size: 0.82rem; color: #ccc; font-weight: 500; }
+      /* Recognition tiers */
+      .recog-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        background: #1a1a1a;
+        border: 1px solid #1a1a1a;
+        margin-bottom: 1.5rem;
+      }
+      .recog-item {
+        background: #0a0a0a;
+        padding: 1.25rem;
+      }
+      .recog-item .level {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+      }
+      .recog-item .level.critical {
+        color: #ff4444;
+      }
+      .recog-item .level.high {
+        color: #eb583d;
+      }
+      .recog-item .level.medium {
+        color: #ffd700;
+      }
+      .recog-item .level.low {
+        color: #888;
+      }
+      .recog-item .recog-label {
+        font-size: 0.82rem;
+        color: #ccc;
+        font-weight: 500;
+      }
 
-    /* CTA */
-    .notice { background: #090900; border-left: 3px solid #ff8c00; padding: 1rem 1.25rem; font-size: 0.84rem; color: #aaa; line-height: 1.75; margin-top: 2rem; }
-    .notice strong { color: #ff8c00; }
-    .cta-row { display: flex; gap: 1.25rem; margin-top: 2.5rem; flex-wrap: wrap; }
-    .btn { display: inline-block; padding: 0.8rem 1.5rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; transition: opacity 0.2s; }
-    .btn-primary { background: #ff8c00; color: #000; }
-    .btn-ghost { background: transparent; color: #aaa; border: 1px solid #333; }
-    .btn:hover { opacity: 0.8; }
+      /* CTA */
+      .notice {
+        background: #090900;
+        border-left: 3px solid #eb583d;
+        padding: 1rem 1.25rem;
+        font-size: 0.84rem;
+        color: #aaa;
+        line-height: 1.75;
+        margin-top: 2rem;
+      }
+      .notice strong {
+        color: #eb583d;
+      }
+      .cta-row {
+        display: flex;
+        gap: 1.25rem;
+        margin-top: 2.5rem;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-block;
+        padding: 0.8rem 1.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: opacity 0.2s;
+      }
+      .btn-primary {
+        background: #eb583d;
+        color: #000;
+      }
+      .btn-ghost {
+        background: transparent;
+        color: #aaa;
+        border: 1px solid #333;
+      }
+      .btn:hover {
+        opacity: 0.8;
+      }
 
-    footer { border-top: 1px solid #1e1e1e; padding: 3rem 0; margin-top: 5rem; }
-    .footer-content { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 2rem; }
-    .footer-section h3 { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin-bottom: 1rem; color: #555; }
-    .footer-section a { display: block; color: #777; text-decoration: none; font-size: 0.85rem; margin-bottom: 0.5rem; transition: color 0.2s; }
-    .footer-section a:hover { color: #fff; }
-    .footer-bottom { border-top: 1px solid #1e1e1e; padding-top: 1.5rem; color: #444; font-size: 0.78rem; }
+      footer {
+        border-top: 1px solid #1e1e1e;
+        padding: 3rem 0;
+        margin-top: 5rem;
+      }
+      .footer-content {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+      .footer-section h3 {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #555;
+      }
+      .footer-section a {
+        display: block;
+        color: #777;
+        text-decoration: none;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        transition: color 0.2s;
+      }
+      .footer-section a:hover {
+        color: #fff;
+      }
+      .footer-bottom {
+        border-top: 1px solid #1e1e1e;
+        padding-top: 1.5rem;
+        color: #444;
+        font-size: 0.78rem;
+      }
 
-    @media (max-width: 768px) {
-      nav { gap: 1.5rem; }
-      .header-content { flex-wrap: wrap; gap: 1rem; }
-      .footer-content { grid-template-columns: 1fr; }
-      main { padding: 3rem 0 3rem; }
-      h1 { font-size: 2rem; letter-spacing: -1px; }
-      .stats-bar { grid-template-columns: 1fr 1fr; }
-      .recog-grid { grid-template-columns: 1fr 1fr; }
-      .findings-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .findings-table th:nth-child(5),
-      .findings-table td:nth-child(5) { display: none; }
-      .cta-row { flex-direction: column; }
-    }
-    @media (max-width: 480px) {
-      .container { padding: 0 1rem; }
-      .logo img { height: 38px; }
-      h1 { font-size: 1.65rem; letter-spacing: -0.5px; }
-      .stats-bar { grid-template-columns: 1fr 1fr; }
-      .recog-grid { grid-template-columns: 1fr; }
-      .findings-table th:nth-child(4),
-      .findings-table td:nth-child(4) { display: none; }
-    }
-  </style>
-  <script defer src="https://cloud.umami.is/script.js" data-website-id="5557b587-f2e2-4eb6-8edd-582164ff68da" nonce="<%= cspNonce %>"></script>
-</head>
-<body>
-  <header>
-    <div class="container">
-      <div class="header-content">
-        <a href="/" class="logo"><img src="/logo1.png" alt="BurnLink" /></a>
-        <nav>
-          <a href="/">Home</a>
-          <a href="/about">About</a>
-        </nav>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <div class="container">
-      <div class="page-content">
-
-        <h1>Hall of Fame</h1>
-        <p class="page-meta">burnlink.page &nbsp;&middot;&nbsp; <span>Security Researchers</span></p>
-
-        <p class="intro">
-          BurnLink thanks every researcher who takes the time to audit our code and report vulnerabilities responsibly. This page recognizes those who helped make the platform safer. All credits are listed with the researcher's explicit consent — anonymous credit is available on request.
-        </p>
-
-        <!-- Stats -->
-        <div class="stats-bar">
-          <div class="stat-item">
-            <div class="stat-value">0</div>
-            <div class="stat-label">Researchers credited</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">0</div>
-            <div class="stat-label">Valid findings</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">0</div>
-            <div class="stat-label">Critical / High</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">&lt;48h</div>
-            <div class="stat-label">Avg. response time</div>
-          </div>
+      @media (max-width: 768px) {
+        nav {
+          gap: 1.5rem;
+        }
+        .header-content {
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+        .footer-content {
+          grid-template-columns: 1fr;
+        }
+        main {
+          padding: 3rem 0 3rem;
+        }
+        h1 {
+          font-size: 2rem;
+          letter-spacing: -1px;
+        }
+        .stats-bar {
+          grid-template-columns: 1fr 1fr;
+        }
+        .recog-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .findings-table {
+          display: block;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+        .findings-table th:nth-child(5),
+        .findings-table td:nth-child(5) {
+          display: none;
+        }
+        .cta-row {
+          flex-direction: column;
+        }
+      }
+      @media (max-width: 480px) {
+        .container {
+          padding: 0 1rem;
+        }
+        .logo img {
+          height: 38px;
+        }
+        h1 {
+          font-size: 1.65rem;
+          letter-spacing: -0.5px;
+        }
+        .stats-bar {
+          grid-template-columns: 1fr 1fr;
+        }
+        .recog-grid {
+          grid-template-columns: 1fr;
+        }
+        .findings-table th:nth-child(4),
+        .findings-table td:nth-child(4) {
+          display: none;
+        }
+      }
+    </style>
+    <script
+      defer
+      src="https://cloud.umami.is/script.js"
+      data-website-id="5557b587-f2e2-4eb6-8edd-582164ff68da"
+      nonce="<%= cspNonce %>"
+    ></script>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="header-content">
+          <a href="/" class="logo"><img src="/logo1.png" alt="BurnLink" /></a>
+          <nav>
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+          </nav>
         </div>
+      </div>
+    </header>
 
-        <!-- Hall of Fame entries -->
-        <h2>Credited researchers</h2>
-        <div class="hof-empty">
-          <div class="trophy">&#127942;</div>
-          <p>
-            No entries yet &mdash; be the first to find a valid vulnerability.<br />
-            <a href="mailto:hello@paperfrogs.dev">Report a vulnerability &rarr;</a>
+    <main>
+      <div class="container">
+        <div class="page-content">
+          <h1>Hall of Fame</h1>
+          <p class="page-meta">
+            burnlink.page &nbsp;&middot;&nbsp; <span>Security Researchers</span>
           </p>
-        </div>
 
-        <!-- Findings log -->
-        <h2>Findings log</h2>
-        <p style="font-size:0.875rem;color:#666;margin-bottom:1.25rem;line-height:1.8;">All reported findings and their resolution status. This log is updated after each remediation cycle. Findings are disclosed once a fix is deployed or after the 90-day disclosure deadline.</p>
+          <p class="intro">
+            BurnLink thanks every researcher who takes the time to audit our
+            code and report vulnerabilities responsibly. This page recognizes
+            those who helped make the platform safer. All credits are listed
+            with the researcher's explicit consent — anonymous credit is
+            available on request.
+          </p>
 
-        <table class="findings-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Title</th>
-              <th>Severity</th>
-              <th>Status</th>
-              <th>Resolved</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="finding-id">BL-002</td>
-              <td>
-                <span class="finding-title">Claimed: URL fragment key theft</span>
-                <span class="finding-note">Reviewed — the URL fragment (#k=…) is the access credential by design (zero-knowledge architecture). The HTTP spec guarantees fragments are never transmitted to the server, never appear in access logs, and are excluded from Referer headers. Password protection adds an independent second factor absent from the URL. Single-use links delete the ciphertext after one read. This is an intentional, documented design trade-off; not a vulnerability.</span>
-              </td>
-              <td><span class="sev high">High</span></td>
-              <td><span class="status-badge design">By design</span></td>
-              <td style="color:#555;font-size:0.8rem;">Mar 2026</td>
-            </tr>
-            <tr>
-              <td class="finding-id">BL-001</td>
-              <td>
-                <span class="finding-title">Race condition on one-time download</span>
-                <span class="finding-note">Two concurrent requests could both receive the encrypted payload. Fixed by deleting the DB record atomically before fetching from storage.</span>
-              </td>
-              <td><span class="sev critical">Critical</span></td>
-              <td><span class="status-badge fixed">Fixed</span></td>
-              <td style="color:#555;font-size:0.8rem;">Mar 2026</td>
-            </tr>
-            <tr>
-              <td class="finding-id">BL-022</td>
-              <td>
-                <span class="finding-title">Claimed: EJS server-side template injection</span>
-                <span class="finding-note">Reviewed — all EJS outputs use &lt;%=&gt; (HTML-escaped). Zero &lt;%-&gt; unescaped tags exist. User inputs are also whitelisted/validated before render. Not a valid finding.</span>
-              </td>
-              <td><span class="sev critical">Critical</span></td>
-              <td><span class="status-badge invalid">Invalid</span></td>
-              <td style="color:#555;font-size:0.8rem;">Mar 2026</td>
-            </tr>
-            <tr>
-              <td class="finding-id">BL-023</td>
-              <td>
-                <span class="finding-title">Claimed: Cold-start wipes brute-force counters</span>
-                <span class="finding-note">Reviewed — password attempt counts and lockout timestamps are stored in Supabase DB, not in memory. Cold starts do not affect brute-force protection. The in-memory rate limiter is supplementary and does not gate the lockout logic. Not a valid finding.</span>
-              </td>
-              <td><span class="sev high">High</span></td>
-              <td><span class="status-badge invalid">Invalid</span></td>
-              <td style="color:#555;font-size:0.8rem;">Mar 2026</td>
-            </tr>
-            <tr>
-              <td class="finding-id">BL-024</td>
-              <td>
-                <span class="finding-title">Claimed: Reverse tabnapping via target=&quot;_blank&quot;</span>
-                <span class="finding-note">Reviewed — every external link in all views already carries rel=&quot;noopener noreferrer&quot;. Not a valid finding.</span>
-              </td>
-              <td><span class="sev medium">Medium</span></td>
-              <td><span class="status-badge invalid">Invalid</span></td>
-              <td style="color:#555;font-size:0.8rem;">Mar 2026</td>
-            </tr>
-            <tr>
-              <td class="finding-id">BL-025</td>
-              <td>
-                <span class="finding-title">Claimed: Link preview bots burn one-time links</span>
-                <span class="finding-note">Reviewed — share URLs point to /file/:id which returns HTML. The /raw fetch is triggered by client-side JavaScript only; bots do not execute JavaScript. The encrypted key is in the URL fragment (#k=…) which is never sent to the server. Not a valid finding for this implementation.</span>
-              </td>
-              <td><span class="sev high">High</span></td>
-              <td><span class="status-badge invalid">Invalid</span></td>
-              <td style="color:#555;font-size:0.8rem;">Mar 2026</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Recognition tiers -->
-        <h2>Recognition tiers</h2>
-        <div class="recog-grid">
-          <div class="recog-item">
-            <div class="level critical">Critical</div>
-            <div class="recog-label">Hall of Fame + Special Thanks</div>
+          <!-- Stats -->
+          <div class="stats-bar">
+            <div class="stat-item">
+              <div class="stat-value">0</div>
+              <div class="stat-label">Researchers credited</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">0</div>
+              <div class="stat-label">Valid findings</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">0</div>
+              <div class="stat-label">Critical / High</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">&lt;48h</div>
+              <div class="stat-label">Avg. response time</div>
+            </div>
           </div>
-          <div class="recog-item">
-            <div class="level high">High</div>
-            <div class="recog-label">Hall of Fame + Shoutout</div>
+
+          <!-- Hall of Fame entries -->
+          <h2>Credited researchers</h2>
+          <div class="hof-empty">
+            <div class="trophy">&#127942;</div>
+            <p>
+              No entries yet &mdash; be the first to find a valid
+              vulnerability.<br />
+              <a href="mailto:hello@paperfrogs.dev"
+                >Report a vulnerability &rarr;</a
+              >
+            </p>
           </div>
-          <div class="recog-item">
-            <div class="level medium">Medium</div>
-            <div class="recog-label">Hall of Fame</div>
+
+          <!-- Findings log -->
+          <h2>Findings log</h2>
+          <p
+            style="
+              font-size: 0.875rem;
+              color: #666;
+              margin-bottom: 1.25rem;
+              line-height: 1.8;
+            "
+          >
+            All reported findings and their resolution status. This log is
+            updated after each remediation cycle. Findings are disclosed once a
+            fix is deployed or after the 90-day disclosure deadline.
+          </p>
+
+          <table class="findings-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Resolved</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="finding-id">BL-002</td>
+                <td>
+                  <span class="finding-title"
+                    >Claimed: URL fragment key theft</span
+                  >
+                  <span class="finding-note"
+                    >Reviewed — the URL fragment (#k=…) is the access credential
+                    by design (zero-knowledge architecture). The HTTP spec
+                    guarantees fragments are never transmitted to the server,
+                    never appear in access logs, and are excluded from Referer
+                    headers. Password protection adds an independent second
+                    factor absent from the URL. Single-use links delete the
+                    ciphertext after one read. This is an intentional,
+                    documented design trade-off; not a vulnerability.</span
+                  >
+                </td>
+                <td><span class="sev high">High</span></td>
+                <td><span class="status-badge design">By design</span></td>
+                <td style="color: #555; font-size: 0.8rem">Mar 2026</td>
+              </tr>
+              <tr>
+                <td class="finding-id">BL-001</td>
+                <td>
+                  <span class="finding-title"
+                    >Race condition on one-time download</span
+                  >
+                  <span class="finding-note"
+                    >Two concurrent requests could both receive the encrypted
+                    payload. Fixed by deleting the DB record atomically before
+                    fetching from storage.</span
+                  >
+                </td>
+                <td><span class="sev critical">Critical</span></td>
+                <td><span class="status-badge fixed">Fixed</span></td>
+                <td style="color: #555; font-size: 0.8rem">Mar 2026</td>
+              </tr>
+              <tr>
+                <td class="finding-id">BL-022</td>
+                <td>
+                  <span class="finding-title"
+                    >Claimed: EJS server-side template injection</span
+                  >
+                  <span class="finding-note"
+                    >Reviewed — all EJS outputs use &lt;%=&gt; (HTML-escaped).
+                    Zero &lt;%-&gt; unescaped tags exist. User inputs are also
+                    whitelisted/validated before render. Not a valid
+                    finding.</span
+                  >
+                </td>
+                <td><span class="sev critical">Critical</span></td>
+                <td><span class="status-badge invalid">Invalid</span></td>
+                <td style="color: #555; font-size: 0.8rem">Mar 2026</td>
+              </tr>
+              <tr>
+                <td class="finding-id">BL-023</td>
+                <td>
+                  <span class="finding-title"
+                    >Claimed: Cold-start wipes brute-force counters</span
+                  >
+                  <span class="finding-note"
+                    >Reviewed — password attempt counts and lockout timestamps
+                    are stored in Supabase DB, not in memory. Cold starts do not
+                    affect brute-force protection. The in-memory rate limiter is
+                    supplementary and does not gate the lockout logic. Not a
+                    valid finding.</span
+                  >
+                </td>
+                <td><span class="sev high">High</span></td>
+                <td><span class="status-badge invalid">Invalid</span></td>
+                <td style="color: #555; font-size: 0.8rem">Mar 2026</td>
+              </tr>
+              <tr>
+                <td class="finding-id">BL-024</td>
+                <td>
+                  <span class="finding-title"
+                    >Claimed: Reverse tabnapping via
+                    target=&quot;_blank&quot;</span
+                  >
+                  <span class="finding-note"
+                    >Reviewed — every external link in all views already carries
+                    rel=&quot;noopener noreferrer&quot;. Not a valid
+                    finding.</span
+                  >
+                </td>
+                <td><span class="sev medium">Medium</span></td>
+                <td><span class="status-badge invalid">Invalid</span></td>
+                <td style="color: #555; font-size: 0.8rem">Mar 2026</td>
+              </tr>
+              <tr>
+                <td class="finding-id">BL-025</td>
+                <td>
+                  <span class="finding-title"
+                    >Claimed: Link preview bots burn one-time links</span
+                  >
+                  <span class="finding-note"
+                    >Reviewed — share URLs point to /file/:id which returns
+                    HTML. The /raw fetch is triggered by client-side JavaScript
+                    only; bots do not execute JavaScript. The encrypted key is
+                    in the URL fragment (#k=…) which is never sent to the
+                    server. Not a valid finding for this implementation.</span
+                  >
+                </td>
+                <td><span class="sev high">High</span></td>
+                <td><span class="status-badge invalid">Invalid</span></td>
+                <td style="color: #555; font-size: 0.8rem">Mar 2026</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Recognition tiers -->
+          <h2>Recognition tiers</h2>
+          <div class="recog-grid">
+            <div class="recog-item">
+              <div class="level critical">Critical</div>
+              <div class="recog-label">Hall of Fame + Special Thanks</div>
+            </div>
+            <div class="recog-item">
+              <div class="level high">High</div>
+              <div class="recog-label">Hall of Fame + Shoutout</div>
+            </div>
+            <div class="recog-item">
+              <div class="level medium">Medium</div>
+              <div class="recog-label">Hall of Fame</div>
+            </div>
+            <div class="recog-item">
+              <div class="level low">Low / Info</div>
+              <div class="recog-label">Honorable Mention</div>
+            </div>
           </div>
-          <div class="recog-item">
-            <div class="level low">Low / Info</div>
-            <div class="recog-label">Honorable Mention</div>
+          <p style="font-size: 0.82rem; color: #555">
+            No monetary rewards are offered. Recognition is our way of saying
+            thank you. Anonymous credit is available on request.
+          </p>
+
+          <div class="notice">
+            <strong>Be the first.</strong> The first researcher to find and
+            responsibly disclose a valid Critical or High severity vulnerability
+            gets a permanent top-of-page credit. Report to
+            <a
+              href="mailto:hello@paperfrogs.dev"
+              style="color: #eb583d; text-decoration: none"
+              >hello@paperfrogs.dev</a
+            >.
+          </div>
+
+          <div class="cta-row">
+            <a href="mailto:hello@paperfrogs.dev" class="btn btn-primary"
+              >Report a vulnerability</a
+            >
+            <a href="/security-policy" class="btn btn-ghost">Security policy</a>
           </div>
         </div>
-        <p style="font-size:0.82rem;color:#555;">No monetary rewards are offered. Recognition is our way of saying thank you. Anonymous credit is available on request.</p>
-
-        <div class="notice">
-          <strong>Be the first.</strong> The first researcher to find and responsibly disclose a valid Critical or High severity vulnerability gets a permanent top-of-page credit. Report to <a href="mailto:hello@paperfrogs.dev" style="color:#ff8c00;text-decoration:none;">hello@paperfrogs.dev</a>.
-        </div>
-
-        <div class="cta-row">
-          <a href="mailto:hello@paperfrogs.dev" class="btn btn-primary">Report a vulnerability</a>
-          <a href="/security-policy" class="btn btn-ghost">Security policy</a>
-        </div>
-
       </div>
-    </div>
-  </main>
+    </main>
 
-  <footer>
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h3>Product</h3>
-          <a href="/">Share files</a>
-          <a href="/about">How it works</a>
-          <a href="/security-policy">Security policy</a>
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3>Product</h3>
+            <a href="/">Share files</a>
+            <a href="/about">How it works</a>
+            <a href="/security-policy">Security policy</a>
+          </div>
+          <div class="footer-section">
+            <h3>Security</h3>
+            <a href="/security-policy">Security policy</a>
+            <a href="/hall-of-fame">Hall of fame</a>
+          </div>
+          <div class="footer-section">
+            <h3>Developer</h3>
+            <a
+              href="https://github.com/Joy-Majumder"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Joy G. Majumdar</a
+            >
+            <a
+              href="https://github.com/Joy-Majumder/BurnLink"
+              target="_blank"
+              rel="noopener noreferrer"
+              >GitHub</a
+            >
+          </div>
+          <div class="footer-section">
+            <h3>Paperfrogs HQ</h3>
+            <p
+              style="
+                font-size: 0.8rem;
+                color: #555;
+                line-height: 1.7;
+                margin-bottom: 0.75rem;
+              "
+            >
+              An infrastructure-first studio building research-driven,
+              production-ready tools. BurnLink is a Paperfrogs product.
+            </p>
+            <a
+              href="https://paperfrogs.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              >paperfrogs.dev</a
+            >
+            <a
+              href="https://github.com/paperfrogs-hq"
+              target="_blank"
+              rel="noopener noreferrer"
+              >GitHub</a
+            >
+          </div>
         </div>
-        <div class="footer-section">
-          <h3>Security</h3>
-          <a href="/security-policy">Security policy</a>
-          <a href="/hall-of-fame">Hall of fame</a>
-        </div>
-        <div class="footer-section">
-          <h3>Developer</h3>
-          <a href="https://github.com/Joy-Majumder" target="_blank" rel="noopener noreferrer">Joy G. Majumdar</a>
-          <a href="https://github.com/Joy-Majumder/BurnLink" target="_blank" rel="noopener noreferrer">GitHub</a>
-        </div>
-        <div class="footer-section">
-          <h3>Paperfrogs HQ</h3>
-          <p style="font-size:0.8rem;color:#555;line-height:1.7;margin-bottom:0.75rem;">An infrastructure-first studio building research-driven, production-ready tools. BurnLink is a Paperfrogs product.</p>
-          <a href="https://paperfrogs.dev" target="_blank" rel="noopener noreferrer">paperfrogs.dev</a>
-          <a href="https://github.com/paperfrogs-hq" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <div class="footer-bottom">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 0.75rem;
+            "
+          >
+            <p>
+              &copy; 2026 BurnLink &mdash; A product of
+              <a
+                href="https://paperfrogs.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="
+                  color: #555;
+                  text-decoration: none;
+                  transition: color 0.2s;
+                "
+                onmouseover="this.style.color = '#fff'"
+                onmouseout="this.style.color = '#555'"
+                >Paperfrogs Lab</a
+              >
+            </p>
+            <a
+              href="https://www.producthunt.com/products/burnlink?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-burnlink-2"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><img
+                alt="BurnLink - Share files. Encrypted. Ephemeral. | Product Hunt"
+                width="250"
+                height="54"
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1090837&amp;theme=dark&amp;t=1772737860949"
+            /></a>
+          </div>
         </div>
       </div>
-      <div class="footer-bottom">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
-          <p>&copy; 2026 BurnLink &mdash; A product of <a href="https://paperfrogs.dev" target="_blank" rel="noopener noreferrer" style="color:#555;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#555'">Paperfrogs Lab</a></p>
-          <a href="https://www.producthunt.com/products/burnlink?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-burnlink-2" target="_blank" rel="noopener noreferrer"><img alt="BurnLink - Share files. Encrypted. Ephemeral. | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1090837&amp;theme=dark&amp;t=1772737860949"></a>
-        </div>
-      </div>
-    </div>
-  </footer>
-</body>
+    </footer>
+  </body>
 </html>
